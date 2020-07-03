@@ -1,0 +1,182 @@
+---
+title: "Econ 343 Ch 1 HW Lastname, Firstname"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+# Ch 01 Computer Assignment #C1.3
+## Using R for your first computer homework assignment.
+### Commands used in this problem:
+- max()
+- min()
+- filter()
+- as_tibble()
+- as.numeric()
+- count()
+- mean()
+- sd()
+- cor()
+- using R as a calculator
+
+INSTRUCTIONS: Fill in the blanks or "???" in the r-chunks and corresponding write-ups below. Some of the questions have already been answered for you to help you get started.
+
+# Load the data
+
+- First upload your own version of meap01 from Cengage, for example "meap01_v5.RData" 
+- Change the filename in the load statement below as needed
+
+```{r}
+#Load the meap01_v5 data manually since it is not in the wooldridge package
+load("~/meap01_v5.RData")
+mydata <- Data
+as_tibble(mydata)
+```
+
+
+## Part (i) Simple Descriptions
+
+Save the results of the min() and max() commands to refer to them in the write-up
+below using inline r. 
+
+```{r}
+
+min_math4 <- min(mydata$math4)
+max_math4 <- max(mydata$math4)
+
+```
+[NOTE: It is common practice to italicize names of variables, and
+bold numerical results, as in the following sentence.]
+
+The lowest *math4* passing rate is **`r min_math4`**. 
+
+The highest value of *_____* is **______________**.
+
+# Part (ii)
+
+## How many have perfect math4 scores?
+
+```{r}
+
+mydata.perfectmath <- filter(mydata,math4==100)
+n_perfectmath <- as.numeric(count(mydata.perfectmath))
+```
+
+The number of schools with a perfect pass rate on the math test is
+**`r ______ `**.
+
+
+## What percent of the total is this?
+```{r}
+n_total <- as.numeric(count(mydata))
+pctperfectmath <- 100 * (______ /n_total)
+
+```
+
+The percent of the schools with a perfect pass rate on the math test 
+is **`r pctperfectmath`** out of a total of **`r n_total`** schools in the sample.
+
+
+# Part (iii)
+## How many have a pass rate of exactly 50%?
+```{r}
+
+mydata.exact50math <- filter(mydata,math4==50)
+n_exact50math <- as.numeric(count(mydata.exact50math))
+
+## Add your own commands to this r chunk to be able to fill in the blank in the
+## sentence below.
+
+
+
+
+```
+
+The number of schools with a perfect pass rate on the math test is
+**`r n_exact50math`**, which is **`r ___ `** percent of the total.
+
+```{r}
+## Part (iv)
+???  <- mean(mydata$math4)
+???  <- mean(mydata$read4)
+```
+
+The average pass rate for all Michigan schools is **`r ???`** for Math and
+**`r ???`** for reading.
+
+## Part (v) Correlation
+```{r}
+
+corr_math_and_read <- cor(mydata$math4,mydata$read4)
+
+```
+
+The correlation between math and reading pass rates is **[(pick one) strong or not strong]**, **`r _______`**.
+
+
+## Part (vi) Coefficient of Variation
+
+```{r}
+avg_exppp <- mean(mydata$exppp)
+sd_exppp  <- sd(mydata$exppp)
+cov_exppp <- sd_exppp/avg_exppp    # example of using R as a calculator
+```
+
+The coefficient of variation in per pupil expenditures is low, **`r ___`**. In other words, there is **[(pick one) a lot or not a lot]** of variation
+among the schools in how much they spend per pupil. 
+
+
+## Part (vii) Log Approximation for % change
+```{r}
+
+ApctmorethanB_exppp <- 100 * (6500 - 4000) / (4000)
+ApctmorethanB_exppp_logapprox <- 100 * (log(6500) - log(4000))
+
+```
+
+[NOTE: The following sentence illustrates the "\frac{}{}" syntax to make
+a fraction show up in a sentence.]
+
+Using the percent difference formual $100 * \frac{A - B}{B}$ yields **`r ApctmorethanB_exppp`**. 
+
+Using the difference in logs approximation
+yields **`r ApctmorethanB_exppp_logapprox`**.
+
+It matters how the differences in school expenditures are calculated. 

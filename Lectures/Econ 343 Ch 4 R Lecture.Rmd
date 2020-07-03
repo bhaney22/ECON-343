@@ -1,0 +1,567 @@
+---
+title: "Econ 343 Ch 4 Lecture Outline - R and Rmarkdown"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 3
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearHypothesis(), predict() hccm() heterosced and qqPlot()
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+# Review
+
+## The Five Steps of Empirical Analysis
+
+1. Start with an **Economic Question**.
+2. Propose an **Economic Model**.
+3. State the **Econometric Model** by specifying the functional form and variables.
+4. **Estimate the econometric model** use data and a statistical package to obtain estimates of the population parameters in the econometric model.
+5. Use the estimated parameters ($\hat{\beta}$s) to test hypotheses and make predictions.
+
+## Example
+
+### 1. Economic Question
+ 
+> How does horsepower affect gas mileage?
+
+### 2. Economic Model
+$$mpg = f(hp,weight)$$
+
+
+### 3. Econometric Model
+$$mpg = \beta_0 + \beta_1 hp + u$$
+
+
+
+### 4. Estimated Model 
+$$\hat{mpg} = \hat{\beta}_0 + \hat{\beta}_1 hp$$
+
+### 5. Interpret results and conduct post-estimation hypothesis tests.
+
+- interpret size and sign of estimated coefficients
+- discussion statistical significance of coefficient estimates
+- linear hypothesis tests
+
+
+## Estimating a linear model
+
+Use the "lm" command in R to estimate a linear regression model.
+
+```{r}
+lm1 <- lm(mpg ~ hp, data=mtcars)
+stargazer(lm1,type="text")
+```
+
+
+## Interpreting Results
+
+Economic Question: How does horsepower affect gas mileage?
+
+``` {r}
+lm1 <- lm(mpg ~ hp, data=mtcars)
+bhat.lm1 <- coef(lm1)
+stargazer(lm1,type="text")
+```
+
+The effect of horsepower (*hp*) on *mpg*
+is examined by estimating the following econometric model:
+$$mpg = \beta_0 + \beta_1 hp + u$$
+
+
+**Discussion:**
+The estimated coefficient on *hp* is **`r lm1$coefficients["hp"] `**. 
+On average, an increase of 100 horsepower will reduce gas mileage
+by approximately `r abs(round(100*lm1$coefficients["hp"],1))` miles per gallon
+
+
+# Ch 4 - Inference
+
+# Learning objectives:
+
+### understand the CLM assumptions
+### determine statistical significance of estimated coefficients
+### conduct eight-step Hypothesis test
+### recall regression results using **summary(coef())**
+### conduct linear hypothesis tests **linearHypothesis()**
+
+
+# **Classical Linear Model** Assumptions
+
+1. Model is linear *in parameters*.
+2. The data are from a random sample.
+3. The explanatory variables are not perfectly collinear.
+4. The model does not omit any relevant variables. (Zero Conditional Mean)
+5. The error terms have the same variance across the range of x's. (Homoskedasticity)
+6. **Normally distributed errors.** (Normality)
+
+## Normality
+
+- If a regression is run and saved in a variable such as: *lm1*, a "Q-Q" plot
+of the **residuals** checks for the normality assumption.
+
+- If the residuals are not normally distributed, and the sample size is small 
+the results from the regression
+will not be statistically valid. 
+
+- However, we know from the *Central Limit Theorem*, 
+that if the sample size is large enough (say $n > 120$), the error terms do not have to be
+normally distributed.
+
+- Researchers also plot **residuals to check** if **heteroskedasticity** might be a problem.
+
+## Normal Q-Q Plot
+
+Use the `qqPlot()` command to examine the normality assumption. It is in the R package **car**.
+
+```{r}
+# Examine the residuals plotted against a normal distribution
+
+lm1 <- lm(mpg ~ hp, data=mtcars)
+qqPlot(lm1)
+```
+
+## Homoskedasticity
+
+Another problem that could invalidate hypothesis tests is the presence of heteroskedasticity.
+To evaluate whether this might be a problem, plot the residuals from the regression
+against the fitted values. Check to see that the width of the scatter of the residuals about
+the line stays the same along the x-axis.
+
+```{r}
+# Plot the residuals against the predicted values. There should be
+# no trend, and the variance should be even at all levels.
+
+gf_point(lm1$residuals ~ lm1$fitted) %>% 
+  gf_lm()
+
+```
+
+# 8-Step Hypothesis Test
+
+The basic steps for all hypothesis tests are the following. The running
+example is the basic hypothesis test for a regression coefficient.
+
+## 1. Identify Population Parameter
+
+Describe the **population parameter** to be tested. Typically this is the definition of the 
+coefficient in the regression.
+
+## 2. State Null Hypothesis
+
+State the **null hypothesis**. The default for all estimated coefficients is:
+
+$$H_0: \beta_1 = 0$$
+
+## 3. State Alternative Hypothesis
+
+State the **alternative hypothesis**, being careful to
+indicate whether it is one-sided or two-sided. 
+
+$$H_A: \beta_1 < 0 \textbf{ or } H_A: \beta_1 > 0$$
+
+$$H_A: \beta_1 \ne 0$$
+
+## 4. Set Alpha
+
+Select the significance level for the test. Typically: $\alpha = 0.05$.
+
+## 5. Compute T-Stat
+
+Compute the **test statistic**. 
+
+
+## 6. Obtain P-value
+
+Find the **p-value** associated with the test statistic from the appropriate distribution.
+
+## 7. Compare P-value to alpha
+
+**Compare the p-value** against the significance level chosen for the test.
+
+
+## 8. Conclude
+
+State the conclusion and discuss.
+
+   - Reject $H_0$ if $\textbf{p-value} < \alpha$\
+   - Fail to reject $H_0$ if $\textbf{p-value} > \alpha$
+   
+# Regression Output
+
+## Use SE, Tstat, Pvalue, Ftest
+
+```{r}
+# Regression results for example in Lecture 2
+
+ lm0 <- lm(log(wage) ~ educ + tenure + exper, data=wage1)
+ stargazer(lm0,type="text", digits = 5,
+          omit.stat = "ser")
+```
+
+
+## How to save and recall regression output
+
+The regression results contain information that can be used later for testing hypotheses.
+
+```{r}
+# Use the regression results from lm1 for the computations.
+
+lm1    <- lm(mpg ~ hp,data=mtcars)
+
+model    <- lm1
+
+b      <- summary(model)$coef[,1]           # estimated coefficient (beta_hat)
+se     <- summary(model)$coef[,2]           # se of the estimated coefficient
+tstat  <- summary(model)$coef[,3]           # t-stat computed by r
+pval   <- summary(model)$coef[,4]           # p-value for H0: beta = 0
+
+F      <- summary(model)$fstatistic["value"] # the F-stat for the test that all betas=0
+df1    <- summary(model)$fstatistic["numdf"] # the numerator   df = k (number of explanatory variables)
+df2    <- summary(model)$fstatistic["dendf"] # the denominator df = n-k-1
+df     <- df2                              # the Df to use in t-tests on the coefficients is the same as df2
+
+# To obtain the b,se,tstat,pval for each individual x-variable:
+#   put the name of the x variable in double quotes and square brackets.
+#   For example, b["hp"] contains the estimated coefficient on hp.
+
+```
+
+
+## Choosing Test Statistics
+
+The key to the hypothesis test is the **test statistic**. The test
+statistic is computed in such a way that it 
+is from a known distribution,
+such as the *t* or *F* distribtution.
+
+```{r}
+tstat_by_hand <- (b["hp"] - 0)/se["hp"]
+```
+
+- This example will compute the t-stat for the coefficient on *hp* from the 
+regression $mpg=\beta_0 + \beta_1\times hp + u$:.
+
+- The test statistic computed by hand should
+be the same as the *t-stat* provided by the regression output.
+
+$$t = \frac{\hat{\beta_1} - 0}{se(\hat{\beta_1})} =
+\frac{`r b["hp"] ` - 0}{`r se["hp"] `} = `r b["hp"]/se["hp"]`$$
+
+
+This test statistic is the same one provided in the regression results: the *t-stat* reported for $\hat\beta_1$ is `r  tstat["hp"] `.
+
+## Finding P-Values
+
+The value of the test statistic is placed on the distribution and 
+the probability that is in the tail is the **p-value**.
+
+To determine the *p-value* for the test statistic use the R command *pt()*. 
+
+
+This command takes 2 argumments: 
+- *tstat* = the test statistic
+- *df* = degrees of freedom (df=n-k-1)
+
+The degrees of freedom were saved from the regression results in the variable "df".
+
+The command **pt(tstat,df)** returns the probability to
+the **left** of the value *t-stat*. 
+
+To get the probability in the upper tail, 
+use a negative value for the t-stat by taking the absolute value and multiplying it by *-1*. 
+
+Multiply the p-value by 2 for a two-sided t-test.
+
+```{r}
+pval_of_tstat_by_hand <- 2*pt(-abs(tstat_by_hand),df=df) 
+```
+
+To verify, the *p-value* calculated by hand = `r pval_of_tstat_by_hand*100000` which
+is the same *p-value*
+provided by the regression output is `r pval["hp"]*100000` (both are scaled
+by 100,000 for human readability).**
+
+
+## Two-sided vs. One-sided Tests
+
+P-values from a one-sided test are the probability in one tail. 
+P-values from a two-sided test are the sum of the probabilities
+in both tails. 
+
+- P-values from standard regression output are from a two-sided test of
+the null hypothesis that the coefficient = 0:
+$$H_0: \beta_j = 0 \textbf{ vs. } H_A: \beta_j \ne 0$$ 
+
+- A one-sided test:
+$$H_0: \beta_j = 0 \textbf{ vs. }  H_A: \beta_j < 0$$ 
+
+- To adjust the *p-values* from regression output for a *one-sided* test, simply divide the p-value in half.
+
+
+## Post-estimation (Linear Hypothesis) Tests 
+
+Regression results automatically conduct the hypothesis
+test to examine if coefficients are statistically significant. 
+Additionally, regression results can be re-purposed to examine other questions.
+
+Common post-estimation hypothesis tests include the following:
+
+- $H_0: \beta_j = k$, where *k* is some number different than 0
+- $H_0: \beta_j = \beta_k$, test whether two parameters are the same 
+- $H_0: \beta_j = 2 * \beta_k$, test whether one parameter is some function of the other 
+- $H_0: \beta_j = \beta_k = 0$, test whether a set of parameters are all 0 
+
+3 ways to obtain test statistic:
+
+1. Calculate by hand 
+2. Use *linearHypothesis()* command
+3. Algebraic approach (textbook)
+
+## How to calculate test statistics by hand
+
+You can conduct a simple linear hypothesis test using the regression results.
+
+Suppose we want to conduct a two-sided test to see whether $\beta_1$ = 1. 
+
+- run the regression and save the estimates
+- calculate the test statistic, for example: $\frac{\hat\beta_{x_1} - k}{se(\hat\beta_{x_1})}$
+- use the **pt()** command to obtain the p-value from the *Student's t distribution*
+- double the p-value if it is a two-sided test
+- compare the p-value to appropriate level of significance, say $\alpha = .05$.
+- write up results
+
+
+```{r}
+
+k <- 1  # <= set the value of for the null hypothesis here
+
+# use the previously saved regression coefficents and standard errors
+
+tstat  <- (b["hp"] - k)/se["hp"] # calculate test statistic
+pval_1 <-   pt(-1*abs(tstat),df) # use pt() to obtain one-sided p-value
+pval_2 <- 2*pt(-1*abs(tstat),df) # multiply p-value by 2 to get two-sided p-value
+```
+
+Results:
+
+$H_0: \beta_j = 1$
+$H_0: \beta_j \ne 1$
+
+
+The *p-value* for the two-sided test is **$`r pval_2 `**. 
+At $\alpha = .05$, the null hypothesis is rejected. 
+Thus, there is strong evidence to suggest that the coefficient is not equal to 1.
+
+## How to use the linearHypothesis() command  
+
+From the *car* package,
+
+Usage:
+
+- **linearHypothesis(model,"test")**
+
+
+where "test" is a null hypothesis stated in terms of the names of the variables in 
+the regression. 
+
+### Use linearHypothesis() for to conduct *F-test* of one restriction
+
+Example: To test if $\beta_{jc} = \beta_{college}$, use "jc = univ" in
+the linearHypothesis() command. See code in r-chunk below.
+
+```{r}
+lm2     <- lm(lwage ~ jc + univ + exper,data=twoyear)
+h1 <- linearHypothesis(lm2,"jc = univ")
+h1
+```
+
+### Use linearHypothesis() to conduct *F-test* of multiple restrictions at once
+
+Example: To test if $\beta_{jc} = 0$ and $\beta_{college} = 0$ jointly, use c("jc = 0","univ=0") in
+the linearHypothesis() command. See code in r-chunk below.
+
+```{r}
+lm2     <- lm(lwage ~ jc + univ + exper,data=twoyear)
+h2 <- linearHypothesis(lm2,c("jc = 0","univ=0"))
+h2
+```
+
+### Test that **all** coefficients = 0 
+
+Simply use the results from the F-test that is part of the regression output.
+
+# How to interpret and report linearHypothesis() results
+
+1. Save the output from the linearHypothesis() command
+2. Get the *F-stat, p-value, df1, and df2* from the saved output
+2. (optional, but recommended) use R to Visualize p-values from Hypothesis Tests
+
+```{r}
+# Extract the pval, and the F-stat and degrees of freedom from the saved linearHypothesis() results
+lm2     <- lm(lwage ~ jc + univ + exper,data=twoyear)
+
+h1      <- linearHypothesis(lm2,"jc=univ")
+
+pval    <- h1$'Pr(>F)'[2]
+fstat   <- round(h1$F[2],2)
+df1.h1  <- h1$Df[2]
+df2.h1  <- h1$Res.Df[2]
+
+```
+
+
+## How to write-up hypothesis test results
+
+In the discussion of the results, it is important to provide all relevant information.
+
+1. Write out the **formal null and alternative hypotheses**.
+2. Indicate whether the test is ***one- or two-sided**, and justify.
+3. Identify the test statistic being computed.
+4. Report the one-sided or two-sided *p-value* of the test. 
+5. Interpret the findings.
+
+### Example 1: Using hand calculated test statistic
+
+To test the $H_0: \hat\beta_{hp} = 1$ against the two-sided alternative, 
+the following test statistic was computed:
+$$t = \frac{\hat{\beta_1} - 1}{se(\hat{\beta_1})} =
+\frac{`r b["hp"] ` - 1}{`r se["hp"] `} = `r tstat`$$.  
+
+### Example 2: Using linearHypothesis() test results
+
+To test if $\beta_{jc} = \beta_{college}$ against a two-sided
+alternative, an *F-test* was conducted. The resulting
+test statistic is **`r fstat`** with df = (`r df1.h1`,`r df2.h1`). The 
+p-value is **`r pval`**. Thus, the difference is **not** statistically significant. 
+This sample does not provide
+evidence that junior college and universities have different impacts on wages. 
+
+
+# (Optional) Algebraic approach - Further explanation of textbook
+
+Supppose you want to test if two coefficients are equal to each other. For example, whether a year of junior college
+has the same affect on wages as a year of university using the model, 
+$$log(wage)=\beta_0 + \beta_1 JC + \beta_2 Univ + u$$ 
+
+The hypothesis you want to test is $\beta_1 = \beta_2$, or $H_0:\beta_1 - \beta_2 = 0$.
+
+The standard error for the difference in the two coefficients is not easy to calculate after the
+regression has already been run.
+
+Instead, we tweak the model slightly, and R computes the correct test
+statistic for us.
+
+
+**The formula to calculate the standard error of the difference between the two coefficients is below. Although you will not be tested on this, it is nice to know.**
+
+$$se(\hat\beta_1-\hat\beta_2) = ([se(\hat\beta_1)]^2 + [se(\hat\beta_2)]^2 
+- 2*Cov(\hat\beta_1,\hat\beta_2))^{1/2}$$
+
+
+## How to test $\beta_1 - \beta_2 = 0$ using textbook approach:
+
+1. Create a new variable that is the sum of the two variables. For example, 
+create $totcoll = JC + Univ$. 
+2. Run the regression with the new variable in place of with $\beta_2$. 
+3. Refer to the regression output. The test of the coefficient on the variable associated with $\beta_1$ will actually test the hypothesis of the difference in the two coefficients, $H_0:\beta_1 - \beta_2 = 0$.
+
+## Why this works:
+
+- Let $\theta = \beta_1-\beta_2$
+- Solve for $\beta_1$: $$\beta_1=\theta + \beta_2$$. 
+- Plug this formula for $\beta_1$ in the original econometric model:
+
+$$log(wage)=\beta_0 + (\theta + \beta_2) JC + \beta_2 (totcoll) + u$$
+- Collect terms:
+
+$$log(wage)=\beta_0 + \theta JC + \beta_2 (JC + Univ) + u$$
+- Replace $(JC + Univ)$ with the new variable: $totcoll = JC + Univ$ to get the model to be estimated:
+
+$$log(wage)=\beta_0 + \theta JC + \beta_2 totcoll + u$$
+
+## Run the model with the new variable
+
+```{r}
+totcoll <- twoyear$jc + twoyear$univ
+
+lm2     <- lm(lwage ~ jc + univ + exper,data=twoyear)
+lm3     <- lm(lwage ~ jc + totcoll + exper,data=twoyear)
+
+model    <- lm3
+
+b      <- summary(model)$coef[,1]           # estimated coefficient (beta_hat)
+se     <- summary(model)$coef[,2]           # se of the estimated coefficient
+tstat  <- summary(model)$coef[,3]           # t-stat computed by r
+pval   <- summary(model)$coef[,4]           # p-value for H0: beta = 0
+
+stargazer(lm2,lm3,type="text",
+          digits = 2,
+          single.row = TRUE,
+          omit.stat=c("ser"))
+```
+
+## Discussion 
+
+The coefficient on *JC* in the second regression is $\theta$, where $\theta = \beta_1 - \beta_2$. 
+
+We tricked R into
+calculating the standard error of the difference for us, and to test whether that
+coefficient (which now represents the *difference* between JC and Univ)
+is different from zero.
+
+
+From the first regression we see that on average, each year of junior college increases wage by **`r lm2$coef["jc"]*100`\%**
+and 
+each year of university increases wage by **`r lm2$coef["univ"]*100`\%**. 
+
+Both estimates are significant at $\alpha=.01$. 
+
+
+The estimated between the two coefficients is the coefficient on *JC* in the second
+regression. The estimated difference between the two different types of college education 
+is estimated by the coefficient on *jc*. The difference is **`r b["jc"]`**. 
+However, the pvalue from the test that the difference = 0 is **`r pval["jc"]`**.
+
+Thus, the difference is **not** statistically significant. This sample does not provide
+evidence that junior college and universities have different impacts on wages.
+
+
+

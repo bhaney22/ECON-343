@@ -1,0 +1,446 @@
+---
+title: "Empirical Project Exploratory Analysis lastname, firstname"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_collapsed: yes
+    toc_float: yes
+    toc_levels: 4
+---
+
+```{r setup, include=FALSE}
+#
+# Always include these packages in R projects for this class
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(haven)      # reading in .dta and .sav data (other stats packages)
+
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+
+options(digits=4)   # limits number of decimals to 4 when printing
+
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+# Get ready! 
+
+Before you get started, you need to read in the data, and get the data cleaned and organized. You will handle missing values and create new
+variables and categories based on what you need. Sometimes you will
+combine data from different datasets together. All of this is 
+known as "data wrangling".
+
+## Read in the dataset
+
+INSTRUCTIONS:
+
+1. First, download the 2018 GSS dataset in SPSS format from the GSS website:
+https://gss.norc.org/get-the-data/spss
+2. It will download as a .zip file
+3. Upload the .zip file to Rstudio - R will automatically unzip it
+4. Make sure you change the location of the dataset to where you saved it
+5. You can add more variables from the GSS by adding them to the "select" statement
+
+```{r}
+mygss <- as.data.frame(read_sav("~/20SU ECON 343/Empirical Project/GSS/GSS2018.sav")) %>%
+  select(YEAR,ID,WRKSTAT,SEX,RACE,RINCOME,INCOME,WEALTH,REGION,
+         AGE,MARITAL,CHILDS,EDUC,DEGREE,
+         PARTYID,PRES16,NATEDUC,COURTS,TAX,NATFARE) 
+
+stargazer(mygss,type="text", 
+          digits = 0, 
+          summary.stat = c("n","min","max","median","mean","sd"))
+
+
+```
+
+
+## Recode missings
+
+The first data wrangling task is almost always to recode missings.
+
+- You can examine the value labels of the variables to identify actual values that
+should be recoded as missing. For example, '9' is a common value that denotes "Refused to answer." You want it to be recoded to "NA" (R's term for a missing value)
+
+- You can also refer to the codebook on the GSS website to obtain even more
+detailed information and the actual survey questions for the variables:
+https://gss.norc.org/Get-Documentation
+
+- Look for values that will need to be recoded as missing (e.g. IAP, DK)
+- Look for variables you will want to collapse to few categories
+
+- Usually, survey data have some values that are actually missing. For example, 
+for some variables a '9' indicates Don't Know and sometimes '0' indicates IAP (inapplicable).
+
+- Before running analysis, these values must be converted to missings so they don't get treated as actual values.
+
+### Step 1: Use `val_lab()`
+
+- Use `val_lab()` to display the value labels 
+- Identify values that should be changed to missing, such as 9 = "Refused")
+- Alternatively, you can look in the GSS Codebook to determine the numerical values 
+for each variable that you need to recode
+- Value labels for most of the variables are in the following r chunk
+
+
+``` {r}
+attach(mygss)  # Again, attach the dataset so you don't have to use "mygss$..."
+               # CAUTION! You must detach() the dataset afterwards
+val_lab(WRKSTAT)
+val_lab(SEX)
+val_lab(RACE)
+val_lab(RINCOME)
+val_lab(INCOME)
+val_lab(WEALTH)
+val_lab(REGION)
+
+val_lab(AGE)
+val_lab(MARITAL)
+val_lab(CHILDS)
+val_lab(EDUC)
+val_lab(DEGREE)
+
+val_lab(PARTYID)
+val_lab(PRES16)
+
+val_lab(NATEDUC)
+val_lab(COURTS)
+val_lab(NATFARE)
+val_lab(TAX)
+
+detach(mygss)
+
+```
+
+### Step 2. Use `mis_val()`
+
+Use the `mis_val()` command to recode categories that represent missing values into actual missing values ("NA"). The `with_labels = TRUE` option drops the labels so those categories don't show up in the tables
+
+Usage:
+
+**mis_val**(*varname*,c(*list of numerical values*), with_labels = TRUE)
+
+```{r}
+
+# Demographic variables...
+mygss$RINCOME <- mis_val(mygss$RINCOME,c(0,13,98,99), with_labels = TRUE)
+mygss$INCOME  <- mis_val(mygss$INCOME,c(0,13,98,99), with_labels = TRUE)
+mygss$WEALTH  <- mis_val(mygss$WEALTH,c(0,98,99), with_labels = TRUE)
+mygss$AGE     <- mis_val(mygss$AGE,c(98,99), with_labels = TRUE)
+mygss$EDUC    <- mis_val(mygss$EDUC,c(97,98,99), with_labels = TRUE)
+mygss$RACE    <- mis_val(mygss$RACE, 0, with_labels = TRUE)
+mygss$DEGREE  <- mis_val(mygss$DEGREE, c(7,8,9), with_labels = TRUE)
+mygss$MARITAL <- mis_val(mygss$MARITAL, c(9), with_labels = TRUE)
+mygss$CHILDS  <- mis_val(mygss$CHILDS, c(9), with_labels = TRUE)
+mygss$WRKSTAT <- mis_val(mygss$WRKSTAT, c(0,9), with_labels = TRUE)
+mygss$REGION  <- mis_val(mygss$REGION, c(0), with_labels = TRUE)
+mygss$PARTYID <- mis_val(mygss$PARTYID, c(8,9), with_labels = TRUE)
+mygss$PRES16  <- mis_val(mygss$PRES16, c(0,3,4,8,9), with_labels = TRUE)
+mygss$COURTS  <- mis_val(mygss$COURTS, c(0,8,9), with_labels = TRUE)
+mygss$NATEDUC <- mis_val(mygss$NATEDUC, c(0,8,9), with_labels = TRUE)
+mygss$NATFARE <- mis_val(mygss$NATFARE, c(0,8,9), with_labels = TRUE)
+mygss$TAX     <- mis_val(mygss$TAX, c(0,8,9,4), with_labels = TRUE)
+
+
+```
+
+
+## Create new variables 
+
+- You will often want to create new variables so that you can
+reduce the number of categories of a variable. 
+- Be sure to
+document what the categories mean so that you can
+label them correctly.
+- Use `mutate()` with `case_when()` to collapse several categories into a few
+
+Usage:
+
+datasetname <- datasetname %>%
+     mutate(**newvarname** = 
+     case_when(condition 1 ~ value if condition 1 holds, 
+     condition * ~ value if condition 2 holds))
+
+
+The following code chunk creates new variables *party*, *region*, *labor force status*, and *agegrp* by collapsing the values of PARTYID, REGION, WRKSTAT, and AGE into a smaller number of categories, using the category cutoffs in the GSS Trend Graphs.
+
+``` {r}
+
+# The GSS variable PARTYID was recoded 
+# into four categories: (0)-(1) Democrat; (2)-(4),(7) Independent, Other; and (5)-(6) 
+# Republican. 
+
+# The GSS variable REGION was recoded into four categories: (1)-(2) Northeast; 
+# (3)-(4) Midwest; 
+# (5)-(7) South; (8)-(9) West. These are in alignment with the Census regional groupings.
+
+# The GSS variable WRKSTAT was recoded into three categories: 
+# (1)-(3) Employed, (4) Unemployed, 
+# and (5)-(8) Not in labor force/Other. 
+# This is in alignment with the Bureau of Labor Statistic's labor force definitions.
+
+mygss <- mygss %>%
+  mutate(party = case_when(PARTYID == 5 | PARTYID == 6 ~ 1,      
+                           PARTYID == 0 | PARTYID == 1 ~ 2,      
+                           PARTYID >= 2 & PARTYID <= 4 ~ 3,      
+                           PARTYID == 7 ~ 3),
+         
+         region   = case_when(REGION == 1 | REGION == 2 ~ 1,     
+                              REGION == 3 | REGION == 4 ~ 2,    
+                              REGION == 5 | REGION == 6 | REGION == 7 ~ 3, 
+                              REGION == 8 | REGION == 9 ~ 4),    
+         
+         # LFS = Labor Force Status
+         lfs    = case_when(WRKSTAT <= 3 ~ 1,                    
+                            WRKSTAT == 4 ~ 2,                    
+                            WRKSTAT > 4 & WRKSTAT < 9 ~ 3),      
+
+         agegrp = case_when(AGE >= 18 & AGE <= 34 ~ 1,
+                            AGE >= 35 & AGE <= 49 ~ 2 ,
+                            AGE >= 50 & AGE <= 64 ~ 3,
+                            AGE >= 65 ~ 4)
+  )
+```
+
+**Dummy variables**
+
+Dummy variables are "0/1" variables, with value = 1 if the variable is true
+and value = 0 if the variable is false
+
+- Use `mutate()` with `if_else()` to create a dummy variable 
+
+Usage:
+
+**mutate**(*varname* = **if_else**(*condition that is true*,1,0))
+
+The following code chunk creates the *married* and *haschild* dummy variables using `if_else()`.
+
+``` {r}
+mygss <- mygss %>%
+  mutate(married  = if_else(MARITAL == 1, 1, 0),
+         haschild = if_else(CHILDS > 0, 1, 0)
+  )
+
+
+```
+
+## Label variables and values
+Variable labels are important! Variable labels give variables a name. This makes tables and results "human readable". 
+
+Value
+labels give names to categories. This provides documentation as well.
+
+Use `apply_labels()` to:
+
+- Name or rename variables
+- Apply names to values (categories) of a variable
+
+Usage:
+
+datasetname <- **apply_labels**(datasetname,*var1* = "var label 1",*var1* = c("*label 1*" = *value 1*, ...))
+
+See below to see how the `apply_labels()` command is used to label
+the new variables created in the last r code chun.
+
+``` {r}
+# Label the new variables and their values
+mygss <-  apply_labels(mygss,
+    party  = "Political Party",
+    party  =  c("Republican" = 1, "Democrat" = 2, "Independent" = 3),
+    region = "Census Region",
+    region =  c("NE" = 1, "Midwest" = 2, "South" = 3, "West" = 4),
+    lfs    = "Labor Force Status",
+    lfs    =  c("Employed" = 1, "Unemployed" = 2, "Not in LF" = 3),
+    agegrp     = "Age",
+    agegrp     =  c("18-34" = 1, "35-49" = 2, "50-64" = 3, "> 64" = 4),
+    married    = "Married",
+    married    =  c("Married" = 1, "Not Married" = 0),
+    haschild   = "Children",
+    haschild   =  c("Has Child" = 1, "No Child" = 0)
+  )
+
+# Check the recodes
+cro(mygss$PARTYID,mygss$party)
+cro(mygss$REGION,mygss$region)
+cro(mygss$WRKSTAT,mygss$lfs)
+
+```
+
+
+## Factor variables
+
+Factors are an important type of variable in R. They are treated as categories. Use `as_factor()` to tell R that variables should be treated as factors (categories). 
+There are a few different ways to apply as_factor to a variable. An easy way
+when there are a lot of variables, is to use the `modify_at()` command.
+
+Usage:
+
+`modify_at(c(list of varnames in double quotes), as_factor)`
+
+``` {r}
+mygss <- mygss %>%
+    modify_at(c("WRKSTAT","SEX","RACE","REGION","MARITAL","DEGREE",
+         "PARTYID","PRES16","NATEDUC","COURTS","TAX","NATFARE",
+         "party","region","lfs","agegrp","married","haschild"), as_factor)
+
+```
+
+# Get set!
+
+Take stock of the variables you have to work with. 
+
+Use the following `cro()` commands to look at the frequencies of the variables.
+
+- `cro()` with one variable displays the for each level of a factor variable
+- `cro_cpct()` reports percentage responses for each level of a factor variable
+-  `cro_cpct(var1,var2)` with two variables. The second variable is the explanatory variable
+- use `cro_cpct()` with `%nest%` for more than one explanatory variable (see below)
+
+## Dependent Variables
+
+``` {r}
+
+cro_cpct(mygss$COURTS)
+cro_cpct(mygss$NATEDUC)
+cro_cpct(mygss$NATFARE)
+cro_cpct(mygss$TAX)
+
+```
+
+
+## Demographic Variables
+``` {r}
+cro(mygss$SEX)
+cro_cpct(mygss$RACE)
+cro_cpct(mygss$agegrp)
+cro_cpct(mygss$region)
+cro_cpct(mygss$married)
+cro_cpct(mygss$haschild)
+
+```
+
+##  Explanatory Variables
+``` {r}
+
+stargazer(mygss,type="text", 
+          digits = 0, 
+          summary.stat = c("n","min","max","median","mean","sd"))
+
+cro_cpct(mygss$DEGREE)
+cro_cpct(mygss$lfs)
+cro_cpct(mygss$RINCOME)
+cro_cpct(mygss$INCOME)
+cro_cpct(mygss$WEALTH)
+cro_cpct(mygss$party)
+cro_cpct(mygss$PRES16)
+
+```
+
+# Go! 
+
+Explore the variables to:
+
+- Look for statistically signficiant differences across groups
+- Look for particularly important control variables
+
+## Add statistical significance to R tables:
+
+- use `cro_cpct()` with two variables
+- add the pipe command `%>%`
+- add the `significance_cpct()` option 
+to display statistical signficance between columns
+
+How to read the table:
+
+- the table columns are labeled with letters. 
+- the letters next to a value in the table indicates that the value of the variable for this group is statistically significantly larger than the value for the group in a different column.
+
+## Voting example
+``` {r}
+
+cro_cpct(mygss$party,mygss$PRES16) %>% 
+  significance_cpct()
+
+```
+
+This table was a helpful "reality check" for me. When I ran this the very first
+time, I noticed quite a few democrats voted for Trump, Hm. I went back and checked my re-codes. Sure enough, I had mis-coded one value.
+
+## COURTS example
+
+Suppose you want to see if
+beliefs about *COURTS* appear to be related to the *region* of the
+respondent
+``` {r}
+cro_cpct(mygss$COURTS,mygss$region) %>% 
+  significance_cpct()
+
+```
+
+It appears that the percent of respondents in the Midwest that believe courts are 
+"about right" is statistically significantly lower than all other regions. The
+percent in the 
+Midwest that believe courts are "not harsh enough" is higher than all other regions,
+but that difference is not statistically significant.
+
+
+## %nest% command
+
+Are the differences statistically significant after controlling for race?
+
+Use the %nest% command to compare categories within another category
+
+Usage:
+
+- cro(*row variable*, *top level* %nest% *bottom level* )
+
+``` {r}
+cro_cpct(mygss$COURTS, mygss$RACE %nest%  mygss$region) %>%   
+  significance_cpct()
+
+```
+
+After controlling for race, it appears that the percentage of whites in the Midwest
+how believe courts are "not harsh enough" is statistically significantly 
+greater than the percent of whites in other regions. What do you notice in these
+results?
+
+
+
+# Your turn
+
+What relationships do you want to explore? Choose one that you find interesting
+and share it on the Community Learning forum this week. You can take a screen shot
+of the table, or print the html page as a .pdf and upload it to the post.
+
+You might want to recode some of the variables differently. Or, you might even want
+to explore the GSS for additional variables. You can add new variables from the
+GSS by adding their name to the "select()" statement when reading in the dataset.
+
+``` {r}
+
+
+
+```
+
+
+
+

@@ -1,0 +1,537 @@
+---
+title: "Econ 343 Ch 6 R Lecture"
+output:
+  html_document:
+    number_sections: no
+    toc: yes
+    toc_collapsed: yes
+    toc_float: yes
+    toc_levels: 3
+  beamer_presentation: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+# Key Concepts
+
+Post-estimation Computations
+
+**1. Interpret**
+
+- Calulate exact log-linear coefficient
+- Interpret Scaled variables
+- Use standardized regressions
+
+**2. Compute Effects **
+
+- Compute marginal effects for quadratics
+- Plot marginal effects
+- Compute average partial effect of interaction
+
+**3. Make Predictions**
+
+- Calculate Predictions
+- Confidence Intervals
+- Confidence Intervals for Point Predictions
+- Calculate predictions from log models
+
+# Log-linear model
+
+- CAUTION: when a 1 unit change in *X* results in a large percentage change in *Y* the $\hat\beta_x$ approximation can be off by a large amount. 
+
+- The exact calculation of the percent
+change in *y* for a one unit change in *x* is:
+
+$$\% \Delta \hat{y} = 100 * [exp(\hat\beta_x) - 1]$$
+
+Using the housing price example pp. 186-187. 
+
+- logged dependent ("log(price)")
+- linear regressor ("rooms")
+
+``` {r}
+lm.loglin <- lm(log(price) ~ log(nox) + rooms, data = hprice2)
+stargazer(lm.loglin,type = "text")
+
+bhat <- coef(lm.loglin)
+```
+
+## Interpretation
+
+- Remember that the coefficient on a linear regressor with a log dependent var is an approximation for a percent change. The approximation gets worse as the estimated percent change gets large.
+
+- The estimate coefficient on *rooms* suggests that on average, one additional room 
+is associated with a **`r 100 * bhat["rooms"] ` `%`** increase in 
+the price of the house. 
+
+- Because that percentage change is large, it is better to calculate the exact percentage change using the estimated coefficient
+
+$$\% \Delta \hat{y} = 100 * [exp(\hat\beta_x) - 1]$$
+
+``` {r}
+exact.pctchg <- 100 * (exp(bhat["rooms"]) - 1) 
+```
+
+- On average, an increase in the number of rooms by 1, controlling for NO2 pollution,
+is associated with a **`r exact.pctchg` `%`** increase in 
+the price of the house.
+
+# Scaling variables
+
+- Scaling variables does not change the qualitative results
+
+- Statistical significance, $R^2$, and *F-tests* do not change
+
+- Scaling variables improves the human readability of results
+
+- divide dependent variables by a power of 10 so that tiny $\hat\beta$ are scaled up
+
+- divide dependent variables or regressors by a conversion factor that puts them into different units
+
+- standardize dependent variables and all regressors (and drop the intercept) to interpret effects in terms of standard deviations
+
+## Use `I()` when scaling regressors
+
+To add, subtract, multiply, or divide dependent variables or regressors in the `lm() command`, put the formula inside `I()`. For example, `I(yvar/100)`.
+
+Example: 
+
+Look at the effect on birthweight in terms of a pack of cigarettes, rather than in terms of single cigarettes. Since 1 pack = 20 cigarettes, divide the number of cigarettes by 20 to get the number of packs smoked per day.
+
+``` {r}
+lm.cig  <- lm(bwght ~ cigs + faminc, data = bwght)
+lm.pack <- lm(bwght ~ I(cigs/20) + faminc, data = bwght)
+
+b.cig <- coef(lm.cig)
+b.pack <- coef(lm.pack)
+
+stargazer(lm.cig,lm.pack,type = "text")
+```
+
+In column (1), on average one additional cigarette reduces birthweight by 
+**`r b.cig["cigs"]`** ounces, holding family income constant.
+
+In column (2), on average one additional pack of cigarettes reduces birthweight by 
+**`r b.pack["I(cigs/20)"]`** ounces, holding family income constant.
+
+# Your turn:
+
+Replicate the *bwghtlbs* regression (column 2 of Table 6.1) on p. 182.
+
+```{r}
+
+#Hint: copy and paste the code from the previous code chunk to get started.
+
+
+
+
+
+
+```
+
+**Your interpretation**
+
+Hint: copy and paste the previous interpretation to get started.
+
+
+## Your turn: Solution (Don't Peek!):
+``` {r}
+lm.ozs <- lm(bwght ~ cigs + faminc, data = bwght)
+lm.lbs <- lm(I(bwght/16) ~ cigs + faminc, data = bwght)
+
+b.ozs <- coef(lm.ozs)
+b.lbs <- coef(lm.lbs)
+
+stargazer(lm.ozs,lm.lbs,type = "text")
+```
+**Interpretation**
+
+- In column (2), on average one additional pack of cigarettes reduces birthweight 
+by **`r b.lbs["cigs"]`** pounds, holding family income constant.
+
+---
+# Use `scale()` to standardize
+
+- Standardizing is a special kind of scaling. 
+
+- To standardize a variable: subtract the mean and divide by its std. deviation. 
+
+- The R command `scale()` simplifies this to one command. 
+
+**R NOTE: when using the `scale()` command for all regressors, do not include an intercept in the regression. Put a "0" as a regressor in `lm()`.**
+
+### Example 6.1
+
+``` {r}
+lm6.1 <- lm(scale(price) ~ 0 + scale(nox) + scale(crime) + scale(rooms) +
+                              scale(dist) + scale(stratio), data=hprice2)
+bhat <- coef(lm6.1)
+
+stargazer(lm6.1,type = "text")
+
+```
+
+## Interpretation
+
+On average, one st.dev. increase in NOX pollution is associated 
+with a **`r bhat["scale(nox)"]`** st.dev. change in the housing price,
+controlling for *crime rate, number of rooms, distance to incinerator, and stratio*.
+
+
+# Quadratics
+
+- To allow for a non-linear relationship between *x* and *y*, enter, use *x*
+and $x^2$ in the econometric model. 
+
+- For example: `lm( depvar ~ x + I(x^2))`
+
+**R Note: arithmatic formulas with regressors, including exponentiation, must be put inside `I()`.**
+
+## Example 6.2
+
+``` {r}
+lm6.2 <- lm(log(price) ~ log(nox) + log(dist) + rooms + I(rooms^2) +
+           stratio,data=hprice2)
+stargazer(lm6.2,type = "text")
+
+```
+
+## Interpretation
+
+- if both $x$ and $x^2$ are in the regression, the coefficient on $x$ does not capture the full effect of *x* on *y*
+
+- you must use the basic regression results to calculate the full effect
+
+### Compute marginal effects 
+
+- When using the quadratic form of *x* in a regression, `lm(y ~ x + I(x^2))`, the **marginal effect** of *x* on *y* changes as the value of *x* changes. 
+
+- The increase in $\hat{y}$, for a one unit increase in *x* when *x* = *xvalue* is:
+
+$$ \hat{\beta_x} + (2 * \hat\beta_{x^2})*xvalue$$
+
+- This is called the **marginal effect** because this is
+how much $\hat{y}$ changes for a one unit increase in *x1*, *on the margin*, 
+that is, when *x1* is set to a particular value.
+
+## Plot marginal effects
+
+It is easy to visualize marginal effects using the command `plot(effect())`
+
+Usage:
+
+- `plot(effect(X,modelname))` 
+
+- uses the estimates from *modelname* to plot the marginal effect of regressor *X* on *Y* for the full range of *X* values
+
+- The plot(effect()) command automatically sets all other regressors at their means when calculating the predicted *Y* given *X*.
+
+- The plot(effect()) command also puts confidence interval bands around the plot. 
+
+``` {r}
+
+plot(effect("rooms",lm6.2))
+
+```
+
+- Notice the hatch marks at the bottom of the plot, these represent the actual values in the dataset
+
+- Notice that the quadratic allows for the effect of *rooms* on *log(price)* to be non-linear.
+
+- Notice that marginal effect near the average of *X* is more
+precisely estimated.
+
+
+# Interaction terms
+
+- Another situation that requires additional computations to identify the full effect of a change in *x* on *y* is when *x* is interacted with another regressor.
+
+- An interaction term is created by multiplying two regressors together: `xvar1 * xvar2`.
+
+- This allows for regressors to have an additional effect on the dependent variable
+
+## Interpretation 
+
+- The typical interpretation formula does not apply. You cannot say, "On average,
+a 1 unit increase in *X* results in a $\hat\beta_X$ unit increase in *Y*." *Why?* because the average increase in *Y* is not the same for at all values of *X*.
+
+- For interpretation, the effect of *xvar1* changes as the value of the regressor it interacts with changes. 
+
+- The **partial effect** of *xvar1* on *y*, is computed by setting *xvar2* = some value.
+
+$$ \hat\beta_{xvar1} + (2 * \hat\beta_{xvar1:xvar2}) * some.xvar2.value $$
+
+## Compute Average Partial Effect
+
+- To calculate *any* partial effect of *x1* on *y*, you
+can specify *any* value for *x2*. 
+
+- To calculate the **average partial effect (APE)** of *x1* on *y*, you
+set *x2* = mean(*x2*).
+
+- The **average partial effect** is:
+
+$$ \hat\beta_{xvar1} + (2 * \hat\beta_{xvar1:xvar2}) * mean(xvar2) $$
+
+- Typically, the **average partial effect** is computed and provided by the researcher when interpreting regression results.
+
+
+### Example 6.3 Attendance and exam score
+
+In the econometric model for this example, *atndrte* is entered as a regressor
+and as an interaction term with *priGPA*. 
+
+**R Note: When using an interaction term, you do not need to also specify each of the variables independently in the lm() command. R does that automatically**
+
+``` {r}
+lm6.3 <- lm(stndfnl ~ atndrte*priGPA + ACT + I(priGPA^2) + I(ACT^2), data=attend)
+stargazer(lm6.3,type = "text")
+```
+
+Save and use the estimated coefficients from the regression to
+calculate the average partial effect (ape).
+
+``` {r}
+b <- coef(lm6.3)
+mean.priGPA <- mean(attend$priGPA)
+APE.atndrte <- b["atndrte"] + mean.priGPA*b["atndrte:priGPA"] 
+```
+
+
+The average value of *priGPA* is `r mean.priGPA`. The average partial effect of *atndrte* on *stndfnl* is **`r APE.atndrte`**. That is, for a student with an 
+average GPA, a 10`%` increase in their attendance rate is associated with a 
+**`r 10*APE.atndrte`** standard deviation increase in their final exam score.
+
+
+# Predictions
+
+- Use the saved estimated coefficients from the regression to calcuate the
+predicted *Y* for a specified set of *X* values.
+
+## Example 6.5
+``` {r}
+
+lm6.5 <- lm(colgpa ~ sat + hsperc + hsize + I(hsize^2),data=gpa2)
+stargazer(lm6.5,type = "text")
+
+xvalues <- data.frame(sat=1200, hsperc=30, hsize=5)
+pred1 <-predict(lm6.5, xvalues)
+
+```
+
+When the regressors are set to `r as_tibble(xvalues)` the predicted college GPA is **`r pred1`**.
+
+# Multiple predictions
+
+- Several predictions can be calculated at the same time by creating
+a dataset that contains input values for each regressor.
+
+- the `fitted()` command is a special instance of `predict()`, where the full dataset is used as the *x* input values for predictions
+
+## Example 6.5 multiple predictions
+``` {r}
+xvalues <- data.frame(sat=c(1100,1100,1300,1300),
+                      hsize=c(3,5,3,5),
+                      hsperc=c(30,30,30,30) 
+                      )
+
+pred.mult <- as.data.frame(predict(lm6.5, xvalues))
+pred.mult
+```
+
+- In R, you can use `cbind(xvalues,predictions)` to create a table that displays the input values next to the resulting predicted values.
+
+``` {r}
+
+results <- cbind(xvalues,pred.mult)
+
+as_tibble(results)
+```
+
+
+# Confidence Intervals
+
+## Use `predict(, interval = "confidence")`
+- To include the predicted value as well as the upper and 
+lower bounds of the confidence interval. The default is 95`%`.
+
+## Example 6.5 continued
+``` {r}
+pred1.ci <- as.data.frame(predict(lm6.5, xvalues, interval = "confidence"))
+pred1.ci
+```
+
+# Confidence Intervals for point estimates
+
+## Use `predict(, interval = "predict")`
+
+- to obtain the confidence interval for the predicted *Y* for an individual 
+with the values of *X*
+- the CI for an individual (point) prediction is much wider than the CI for
+the average prediction.
+
+### Example 6.6 Prediction Intervals for an individual
+These intervals are
+``` {r}
+xvalues <- data.frame(sat=c(1200,900,1400), 
+                      hsperc=c(30,20,5), 
+                      hsize=c(5,3,1))
+
+pred.point  <- predict(lm6.5, xvalues, interval = "predict")
+
+results <- cbind(xvalues,pred.point)
+results
+
+
+```
+
+# Predictions from log models
+
+## Predict when log(y)
+
+- Predicting log(y) is straigtforward: $\hat{log(y)} = \hat\beta_x * x$
+- You cannot predict *y* by "un-logging" the predicted *log(y)*
+- $ \hat{y} \ne exp(\hat{log(y)})$
+- must multiply $exp(\hat{log(y)})$ by $exp(\hat{\sigma^2}/2)$
+- $\hat{\sigma^2}$ is the standard error of the regression (*ser*)
+- if the sample size is small - estimate $exp(\sigma^2/2)$ with the formula for $\hat\alpha$ on (p. 206)
+
+Steps to predict *y* in log-linear model 
+
+1. Estimate the log-linear regression
+2. Save $\hat{log(y)}$ using `fitted()`
+3. Obtain the value of $\hat{\sigma}$ from `summary(lm.loglin)$sigma`
+4. Predict the "unlogged" dependent variable, $\hat{y}$:
+
+$$\hat{y} = exp(\hat{\sigma}/2)*exp(\hat{log(y)})$$
+
+
+``` {r}
+mydata <- hprice2
+
+lm.loglin <- lm(log(price) ~ log(nox) + rooms, data = mydata)
+stargazer(lm.loglin,type = "text")
+
+logyhat <- fitted(lm.loglin)
+sigmahat <- summary(lm.loglin)$sigma
+
+mydata <- mydata %>%
+  mutate(price.hat = exp(sigmahat/2) * exp(logyhat))
+
+as_tibble(mydata %>% select(price,price.hat,nox,rooms))
+
+
+```
+
+# Your turn: Example 6.7 CEO Salaries
+
+- Use following code chunk to predict $\hat{salary}$ from $\hat{log(salary)}$ 
+- Use the steps above with the example in the book on pg. 207.
+- Copy the above code chunk to the empty code chunk below
+- Change the commands to use the correct dataset and variables
+- See if you can replicate the results in the example
+
+```{r}
+
+#Hint: copy and paste the code from the previous code chunk to get started.
+
+
+
+
+
+
+```
+
+**Your interpretation**
+
+
+
+
+## Your turn: Solution (Don't peek!)
+
+
+``` {r}
+mydata <- ceosal2
+
+lm.ceo <- lm(log(salary) ~ log(sales) + log(mktval) + ceoten, data = mydata)
+stargazer(lm.ceo,type = "text")
+
+logyhat <- fitted(lm.ceo)
+sigmahat <- summary(lm.ceo)$sigma
+
+mydata <- mydata %>%
+  mutate(sal.hat = exp(sigmahat/2) * exp(logyhat))
+
+as_tibble(mydata %>% select(salary, sal.hat, sales, mktval, ceoten) )
+
+
+```
+
+# Re-cap: Key Concepts
+
+Post-estimation Computations
+
+**1. Interpret**
+
+- Calulate exact log-linear coefficient
+- Interpret Scaled variables
+- Use standardized regressions
+
+**2. Compute Effects **
+
+- Compute maginal effects for quadratics
+- Plot marginal effects
+- Compute average partial effect of interaction
+
+**3. Make Predictions**
+
+- Calculate Predictions
+- Confidence Intervals
+- Confidence Intervals for Point Predictions
+- Calculate predictions from log models
+
+
+
+
+
+
+
+
+

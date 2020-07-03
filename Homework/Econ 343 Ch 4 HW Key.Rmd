@@ -1,0 +1,250 @@
+---
+title: "Econ 343 Ch 4 HW Key"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+Instructions: 
+
+- In addition to using the results for the homework on Cengage, 
+you will write up the analysis for both computer exercise assignments (C1 and C8) as a "report" using this template.
+- Write of the results for each part of the homework in a sentence or two.
+- **Show all work by doing
+math in R chunks and using inline R to refer to the result in the write-up.** 
+
+# Ch 4 C1 - Voting Report
+
+## 1. Economic Question
+
+*How do campaign expenditures affect voting outcomes?*
+
+## 2. Economic Model
+
+
+$$Vote% = f(expenditures, competitor expenditures, if incumbant)$$
+
+## 3. Econometric Model
+
+*{Instructions: Replace depvar and x_ vars with the actual variable names.}*
+
+$$voteA = \beta_0 + \beta_1 * log(expendA) + \beta_2 * log(expendB) + u $$
+
+## 4. Data
+
+Found in the description of the file in the Wooldridge package.
+
+
+
+## 5. Results
+
+### Part (i)
+
+
+```{r}
+# Download the STATA dataset from Cengage and then upload the dataset to Rstudio
+# change the location and version number of the dataset 
+# in the load command, as needed
+
+library(haven)
+mydata <- as.data.frame(read_dta("~/20SU ECON 343/Homework/Data/vote1_v2.dta"))
+stargazer(mydata, type = "text")  
+
+```
+
+
+
+```{r}
+# Enter the R commands you need to answer this part of the question
+# Do this as needed for all of the subsequent parts
+
+lm1 <- lm(voteA ~ log(expendA) + log(expendB) + prtystrA, data = mydata)
+bhat1 <- coef(lm1)
+
+stargazer(lm1,type = "text",digits = 2)
+
+```
+$$\widehat{depvar} = 
+  `r round(bhat1["(Intercept)"],2)`
++ `r round(bhat1["log(expendB)"],2)`log(expendB) 
++ `r round(bhat1["log(expendA)"],2)`log(expendA) 
++ `r round(bhat1["prtystrA"],2)`prtystrA $$
+
+### Part (ii)
+
+``` {r}
+# Compute results as needed and save.
+# Refer to the variable name that contains the computed results in
+# the inline r chunk in the write up below.
+
+```
+
+
+
+### Part (iii)
+
+``` {r}
+# Compute results as needed and save.
+# Refer to the variable name that contains the computed results in
+# the inline r chunk in the write up below.
+
+```
+
+### Part (iv)
+
+``` {r}
+# Compute results as needed and save.
+# Refer to the variable name that contains the computed results in
+# the inline r chunk in the write up below.
+
+```
+
+---
+
+
+# Ch 4 C8 - Pensions Report
+
+
+## 1. Economic Question
+
+*write your answer here*
+
+## 2. Economic Model
+
+$$depvar = f(variables)$$
+
+## 3. Econometric Model
+*{Instructions: Replace depvar and x_ vars with the actual variable names.}*
+
+$$depvar = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + u $$
+
+## 4. Data
+
+*Describe the source of the data* 
+
+
+## 5. Results
+
+
+```{r}
+# Download the STATA dataset from Cengage and then upload the dataset to Rstudio
+# change the location and version number of the dataset 
+# in the load command, as needed
+
+library(haven)
+
+# Use the as.data.frame() command to ensure the data can be used by stargazer()
+mydata <- as.data.frame(read_dta("~/20SU ECON 343/Homework/Data/401ksubs_v1.dta")) 
+stargazer(mydata, type = "text")  
+
+```
+
+
+### Part (i)
+```{r}
+# Compute results as needed and save.
+# Refer to the variable name that contains the computed results in
+# the inline r chunk in the write up below.
+
+num.single <- count(mydata %>% filter(fsize == 1))
+
+# Use the following in an inline r chunk to include a comma separater
+# formatC(as.numeric(num.unmarried),big.mark = ",")
+# the "as.numeric" command is needed sometimes
+
+```
+The number of single people in the dataset is 
+**`r formatC(as.numeric(num.single),big.mark = ",")`**, or
+**`r round(num.single / count(mydata) * 100,1)``%`** of the sample.
+
+
+### Part (ii)
+
+``` {r}
+lm2 <- lm(nettfa ~ inc + age, data = mydata %>% filter(fsize == 1))
+bhat2 <- coef(lm2)
+
+stargazer(lm2,type = "text",digits = 2)
+
+
+
+```
+
+**The
+estimated equation for part (ii) is:**
+
+$$\widehat{depvar} = 
+  `r round(bhat2["(Intercept)"],2)`
++ `r round(bhat2["inc"],2)`inc 
++ `r round(bhat2["age"],2)`age $$
+
+### Part (iii)
+
+``` {r}
+# Compute results as needed and save.
+# Refer to the variable name that contains the computed results in
+# the inline r chunk in the write up below.
+
+```
+
+### Part (iv)
+
+``` {r}
+# Compute results as needed and save.
+# Refer to the variable name that contains the computed results in
+# the inline r chunk in the write up below.
+
+tstat_by_hand <- 
+
+
+```
+
+
+### Part (v)
+
+``` {r}
+# Compute results as needed and save.
+# Refer to the variable name that contains the computed results in
+# the inline r chunk in the write up below.
+
+```

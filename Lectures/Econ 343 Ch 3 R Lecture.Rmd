@@ -1,0 +1,369 @@
+---
+title: "Econ 343 Ch 3 R Lecture"
+subtitle: "R and Rmarkdown"
+fontsize: 10pt
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+  beamer_presentation: default
+---
+
+
+```{r setup, include=FALSE}
+
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+#
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk.
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(scales)     # to format inline r as currency
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+# Ch 03 R and Rmarkdown concepts
+
+### R Commands (*) indicates new:
+- mutate():     to add variables to your dataset*
+- gf_point():  for scatter plots
+- cor():       for correlations
+- log():       for log transformation
+- lm():        for running OLS
+- stargazer()  to summarize data and present regression results
+- coef():      to save the estimated slope coefficients
+- fitted():    to save the yhats*
+- resid():     to save the uhats*
+- plot(resid()): to plot residuals*
+
+### Rmarkdown Syntax Introduced in this lecture:
+
+- use `$` around math symbols, subscripts, and Greek letters in Rmarkdown
+- use `$$` to set math apart on separate line
+- use `\` in front of math symbols or Greek letters
+- use `_` for subscript and `^` for superscript
+- e.g. type `$\hat{\beta}_{var}$` to display $\hat{\beta}_{var}$
+
+
+# Lecture 1 - R and Rmarkdown with Multivariate Regression
+
+```{r}
+mydata <- meap01 %>% select(math4,lunch, exppp)
+stargazer(mydata, digits = 0, type="text",
+          omit.summary.stat = "sd")
+```
+
+
+# Correlation Matrix
+
+What do you notice?
+
+``` {r}
+cor.tbl <- cor(mydata)
+stargazer(cor.tbl,type="text",digits=2)
+
+```
+
+
+# Regression
+```{r echo=FALSE}
+lm.slr <- lm(math4 ~ log(exppp), data=mydata)
+lm.mlr <- lm(math4 ~ log(exppp) + lunch, data=mydata)
+stargazer(lm.slr,lm.mlr,
+          type="text",
+          digits=2,
+          no.space=TRUE,
+          omit.stat = c("ser","f"))
+```
+
+# Interpreting Simple Regression Estimates
+
+``` {r}
+bhat.slr <- coef(lm.slr)
+bhat.mlr <- coef(lm.mlr)
+```
+
+Use an inline r chunk in Rmarkdown like this:
+
+In the simple regression, the coefficient on per pupil expenditures
+(*log(exppp)*) is 'r bhat.slr["log(exppp)"]'.
+
+When knitted, it gets replaced:
+
+In the simple regression, the coefficient on per pupil expenditures
+(*log(exppp)*) is **`r bhat.slr["log(exppp)"]`**.
+
+
+**Interpretation:** On average, for every 1\% increase in
+per pupil expenditures, the pass rate on the math exam changes by
+$\beta_{log(exppp)}$ /100 or
+**`r bhat.slr["log(exppp)"] / 100`** percentage points,
+assuming all else holds constant.
+
+**Keep in mind**:
+
+- *level-log*: when the *x* variable is logged, but the *y* variable
+is in levels, $\hat\beta$ is **divided** by 100. 
+- *log-level*: when *y* is logged
+but *x* is in levels, then $\hat\beta$ is **multiplied** by 100.
+
+# Interpreting Multiple Regression Estimates
+
+In the multiple regression, the coefficient
+on per pupil expenditures
+(*log(exppp)*) is **`r bhat.mlr["log(exppp)"]`**.
+
+**Interpretation:** On average, for every 1\% increase in
+per pupil expenditures, the pass rate on the math exam changes by
+$\beta_{log(exppp)}$ / 100 or
+**`r bhat.mlr["log(exppp)"] / 100`** percentage points,
+holding school poverty constant.
+
+**What does this mean in reality?**
+
+The average per pupil expenditure is **`r dollar(mean(mydata$exppp))`**.
+A typical school that spends 10\% more per
+pupil is spending about **`r dollar(0.10 * mean(mydata$exppp))`**. 
+On average, this would be associated with 
+a **`r round(10 * bhat.mlr["log(exppp)"] / 100,1)`** percentage
+points higher math test pass rate, holding poverty constant.
+
+# What does it mean to "hold constant"?
+
+- To hold constant, or "to control for", is to "remove the effect" of the *omitted* variable from the *explanatory* variable. 
+- In the above 
+example, it would mean to remove the effect of *lunch*
+from the *log(exppp)* variable. 
+- Estimated regression coefficients
+are called "partial effects" because they "hold constant" the
+effects of all other variables.
+
+# Visualize partial effects
+
+One way to visualize partial effects is to run a regression of *log(exppp)* on *lunch* and then use the **residuals** from that regression in place
+of *log(exppp)* in the regression for *math4*.
+
+Regress log(exppp) on lunch
+``` {r}
+
+lm.exppp <- lm(log(exppp) ~ lunch,data=mydata)
+```
+
+
+The residuals represent the part of log(exppp) that is not correlated with lunch
+``` {r}
+
+logexppp.partial <- resid(lm.exppp)
+```
+
+
+Use the residuals in the *math4* regression
+``` {r}
+lm.partial <- lm(math4 ~ logexppp.partial + lunch,data=mydata)
+```
+
+# Regression coefficients are Partial effects
+
+Look! The estimated coefficient on log(exppp) are identical.
+``` {r echo=FALSE}
+stargazer(lm.mlr,lm.partial,type="text",
+          omit.stat = c("ser","f"))
+
+```
+
+# Look at the new correlations
+```{r}
+round(cor(mydata %>% 
+            mutate(lexppp = log(mydata$exppp),
+                   lexppp.partial = logexppp.partial)),2)
+```
+
+
+# Lecture 2 - Omitted Variable Bias (Sec. 3-3b)
+
+- Models with only one explanatory variable
+are almost always "underspecified" 
+- Underspecified models omit one or more important explanatory factors 
+- Underspecified model estimates are biased. 
+- Omitted variable bias
+is a serious issue that can be a problem even when there is more
+than one explanatory variable, too.
+
+# Example of OVB
+
+The regression of *math4* on *log(exppp)* estimated that on average,
+for every 1\% increase in
+per pupil expenditures, the pass rate on the math exam changes by
+$\beta_{log(exppp)}$ \/ 100 or
+**`r bhat.slr["log(exppp)"] / 100`** percentage points.
+
+But this estimate
+is biased. The following section explains how the magnitude
+of the bias can be estimated. (see Sec 3-3b on pp. 84-85 in the text)
+
+
+# What happens when an important variable is left out of the model?
+Suppose the true population model is:
+
+True Model: $y = \beta_0 + \beta_1  x_1 + \beta_2  x_2 + u$
+
+Estimated model: $\tilde{y} = \tilde{\beta_0} + \tilde{\beta_1}  x_1$
+
+Estimated omitted variable model: $\tilde{x_2} = \tilde{\delta_0} + \tilde{\delta_1}x_1$
+
+The expected value of the estimate from the underspecified model is:
+
+
+$$E(\tilde{\beta_1}) = \beta_1 + \beta_2 * \tilde{\delta_1}$$
+
+where the last term represents the two components of bias:
+
+- $\beta_2$ represents the coefficient of the omitted variable in the true model
+- $\tilde{\delta}$ represents the correlation between the omitted variable and the explanatory
+variable.
+
+# Example: the biased estimate of per pupil expenditures
+
+Suppose we want to estimate the sign and magnitude of omitted variable bias on the
+coefficient $\beta_1$ in the underspecified
+model (lm1):
+
+$$ math4 = \beta_0 + \beta_1 log(exppp) + u $$
+
+Assuming we have data for the omitted variable, we can compute the bias in three steps:
+
+1. Estimate the true model,
+the one that includes the omitted variable to get $\hat\beta_2$, the coefficient on the omitted variable (lm2)
+2. Run a regression of
+the omitted variable on the explanatory variable to get $\hat\delta_1$, the correlation
+between the omitted variable and the explanatory variable. (lm3)
+3. Calculate the bias by multiplying $\hat\beta_2$ * $\hat\delta_1$.
+
+# Regressions to calculate the bias
+
+```{r}
+lm1 <- lm(math4 ~ log(exppp), data=mydata)
+lm2 <- lm(math4 ~ log(exppp) + lunch, data=mydata)
+lm3 <- lm(lunch  ~ log(exppp), data=mydata)
+```
+
+
+``` {r echo = FALSE}
+#To adjust table size with stargazer, you can change the font size font.size=, #make the Stargazer single row single.row = TRUE and change the space between #columns column.sep.width = "1pt" in stargazer().
+
+stargazer(lm2,lm3,
+          column.labels = c("True Model","Omitted Var Regression"),
+          type="text",
+          digits = 2,
+          single.row = TRUE,
+          omit.stat=c("ser","f"))
+```
+
+
+# Computing the amount of bias
+``` {r}
+
+bhat.under <- coef(lm1)
+bhat.true  <- coef(lm2)
+dhat       <- coef(lm3)
+
+bias <- bhat.true["lunch"] * dhat["log(exppp)"]
+```
+
+
+In the above example, the bias is
+ 
+$\hat{\beta_2}$ (`r bhat.true["lunch"] `) * $\widetilde{\delta_1}$ (`r dhat["log(exppp)"] `)
+= **`r bias`**.
+
+Note that the difference between coefficient on *log(exppp)* in the underspecified model and the
+true model is exactly equal
+to the computed bias amount.
+
+**Write-up: The bias of the estimated effect of per pupil expenditures from the SLR is
+negative and large in magnitude. **
+The SLR suggests that per pupil expenditures reduces *math4* somewhat.
+However, Controlling for poverty shows
+that per pupil expenditures actually
+increases math pass rates.**
+
+# Lecture 3 - Evaluating Validity of MLR Assumptions
+
+If the G-M assumptions hold, then the estimates from a linear regression model
+are BLUE: **B**est **L**inear **U**nbiased **E**stimates
+
+1. Model is linear *in parameters*.
+2. The data are from a random sample.
+3. The explanatory variables are not perfectly collinear.
+4. The model does not omit any relevant variables. (Zero Conditional Mean)
+5. The error terms have the same variance across the range of x's. (Homoskedasticity)
+
+# Example
+
+Suppose a policy analyst reports the above simple linear regression results
+and concludes that increasing school expenditures per pupil will do
+nothing to improve math performance.
+
+Q: What response might you make to them?
+
+# Evaluate the regression assumptions:
+
+1. Linear in parameters? *Ok. And, log(exppp) allows non-linearity.*
+2. Random sample *Ok, no systematic exclusion of Michigan schools.*
+3. There is variation in the predictor variable *Yes.*
+4. There are no omitted variables **Not OK. See next slide**
+5. Homoskedasticity *OK. See residual plot below.*
+
+``` {r echo=FALSE}
+plot(resid(lm1))
+```
+
+
+# Rebuttal when there is omitted variable bias
+
+The conclusion that this policy analyst draws is incorrect. Their analysis
+does not account for the negative impact poverty has on academic performance.
+Because poverty is also correlated with per pupil expenditures, the estimated
+effect of per pupil expenditures on academic performance is biased.
+
+Poverty has a large downward effect on math performance. Poverty
+and per pupil expenditures have a small positive relationship.
+
+Since bias is the multiple of these two effects (large **-**) * (+), the estimate of the effect of per pupil expenditures on
+math performance from the simple linear regression is 
+biased downward. 
+
+Using the percent of students receiving free or reduced-price lunch in the regression to control for the effects of poverty, it is estimated that a school that spends 10\% more per
+pupil, about **`r dollar(0.10 * mean(mydata$exppp))`** for a typical school, would see, on average,
+a **`r round(10 * bhat.mlr["log(exppp)"] / 100,1)`** percentage
+points **increase** in the pass rate on the 4th grade math exam.
+
+Thus, there is evidence to suggest that per pupil expenditures can improve
+academic performance.
+
