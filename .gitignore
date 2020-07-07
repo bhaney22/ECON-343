@@ -1,6 +1,6 @@
-*.Rproj.user
+*.Rproj
 *.Rhistory
-*.RData
+**/**/*.RData
 *.Ruserdata
 *.html
 *.dta
@@ -8,6 +8,6 @@
 *.log
 *.tex
 *.pdf
-/Scratch
-/Homework/Data
-/Homework/Keys
+Scratch/
+Homework/Data/
+Homework/Keys/
