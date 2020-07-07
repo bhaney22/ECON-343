@@ -3,9 +3,10 @@ This repository contains the most up to date version of the Lecture, Homework te
 
 **Instructions**
 - Scroll up and click on the name of the folder (Lectures, Homework, or Empircal Project).
-- Click on the .Rmd file to open it
-- Copy and paste the contents of the .Rmd file into a new file in Rstudio **OR**
-- Download the .Rmd file to your computer and then upload to Rstudio
+- Right-click on the .Rmd file and click "Save as" to download it
+- Or, you can double-click on the .Rmd file to open it 
+  - Copy and paste the contents of the .Rmd file into a **new text file** in Rstudio 
+  - Save the new file with the correct name and give it a **.Rmd** file extension
 
 
 **Index of R commands introduced in each "Ch X R Lecture.Rmd file"**
