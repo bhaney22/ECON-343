@@ -50,27 +50,19 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 ```
 # Ch 03 R and Rmarkdown concepts
 
-### R Commands demonstrated in Ch 2 lecture:
-- gf_histogram() for distributions of one variable
-- gf_point()     for scatter plots of two variables
-- lm()           to estimate a regression model
-- stargazer()    to display estimated regression results
-- coef()         to save the estimated coefficients from a regression
-- fitted()       to save the predicted values from the regression ($\hat{y}$)
+### R Commands introduced in this lecture:
 - mutate():      to add variables to your dataset*
 - cor():         for the correlation between two or more variables
 - log():         for log transformation
+- resid():       to save the uhats
+- plot(resid()): to plot residuals
 
-### New R Commands demonstrated in this lecture:
-- resid():     to save the uhats*
-- plot(resid()): to plot residuals*
+### Rmarkdown Syntax introduced in this lecture:
 
-### Rmarkdown Syntax Introduced in this lecture:
-
-- use `$` around math symbols, subscripts, and Greek letters in Rmarkdown
-- use `$$` to set math apart on separate line
-- use `\` in front of math symbols or Greek letters
-- use `_` for subscript and `^` for superscript
+- `$` around math symbols, subscripts, and Greek letters in Rmarkdown
+- `$$` to set math apart on separate line
+- `\` in front of math symbols or Greek letters
+- `_` for subscript and `^` for superscript
 - e.g. type `$\hat{\beta}_{var}$` to display $\hat{\beta}_{var}$
 
 
