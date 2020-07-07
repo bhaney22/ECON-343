@@ -45,9 +45,7 @@ library(plm)        # lm commands for panel data
 options(digits=4)   # limits number of decimals to 4 when printing
 knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
 ```
-# Ch 4 R Lecture
-
-###R and Rmarkdown syntax introduced in this lecture**
+### R and Rmarkdown syntax introduced in this lecture**
 
 - `summary()` to save the regression results
 - r inline mini-chunk to display a regression result, or other computation

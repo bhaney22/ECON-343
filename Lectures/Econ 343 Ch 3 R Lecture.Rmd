@@ -48,8 +48,6 @@ library(plm)        # lm commands for panel data
 options(digits=4)   # limits number of decimals to 4 when printing
 knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
 ```
-# Ch 03 R and Rmarkdown concepts
-
 ### R Commands introduced in this lecture:
 - mutate():      to add variables to your dataset*
 - cor():         for the correlation between two or more variables

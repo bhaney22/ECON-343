@@ -42,9 +42,7 @@ library(plm)        # lm commands for panel data
 options(digits=4)   # limits number of decimals to 4 when printing
 knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
 ```
-# Ch 02 R Lecture
-
-### R Commands demonstrated in this lecture:
+### R Commands introduced in this lecture:
 - gf_histogram() for distributions of one variable
 - gf_point()     for scatter plots of two variables
 - lm()           to estimate a regression model
