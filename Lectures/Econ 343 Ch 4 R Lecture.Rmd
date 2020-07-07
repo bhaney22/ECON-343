@@ -253,12 +253,7 @@ The regression results contain information that can be used later for testing hy
 
 lm1    <- lm(mpg ~ hp,data=mtcars)
 
-model    <- lm1
 
-b      <- summary(model)$coef[,1]           # estimated coefficient (beta_hat)
-se     <- summary(model)$coef[,2]           # se of the estimated coefficient
-tstat  <- summary(model)$coef[,3]           # t-stat computed by r
-pval   <- summary(model)$coef[,4]           # p-value for H0: beta = 0
 
 F      <- summary(model)$fstatistic["value"] # the F-stat for the test that all betas=0
 df1    <- summary(model)$fstatistic["numdf"] # the numerator   df = k (number of explanatory variables)
@@ -482,7 +477,7 @@ This sample does not provide
 evidence that junior college and universities have different impacts on wages. 
 
 
-# (Optional) Algebraic approach - Further explanation of textbook
+# (Optional) Algebraic approach - Further explanation of the textbook
 
 Supppose you want to test if two coefficients are equal to each other. For example, whether a year of junior college
 has the same affect on wages as a year of university using the model, 

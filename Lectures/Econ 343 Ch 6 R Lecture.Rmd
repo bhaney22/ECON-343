@@ -6,7 +6,7 @@ output:
     toc: yes
     toc_collapsed: yes
     toc_float: yes
-    toc_levels: 3
+    toc_levels: 2
   beamer_presentation: default
   word_document: default
   pdf_document: default
@@ -59,7 +59,7 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 
 # Key Concepts
 
-Post-estimation Computations
+Three purposes for Post-estimation Computations
 
 **1. Interpret**
 
@@ -195,7 +195,7 @@ stargazer(lm.ozs,lm.lbs,type = "text")
 by **`r b.lbs["cigs"]`** pounds, holding family income constant.
 
 ---
-# Use `scale()` to standardize
+# Standardize using `scale()`
 
 - Standardizing is a special kind of scaling. 
 
@@ -216,7 +216,7 @@ stargazer(lm6.1,type = "text")
 
 ```
 
-## Interpretation
+**Interpretation**
 
 On average, one st.dev. increase in NOX pollution is associated 
 with a **`r bhat["scale(nox)"]`** st.dev. change in the housing price,
@@ -232,7 +232,7 @@ and $x^2$ in the econometric model.
 
 **R Note: arithmatic formulas with regressors, including exponentiation, must be put inside `I()`.**
 
-## Example 6.2
+### Example 6.2
 
 ``` {r}
 lm6.2 <- lm(log(price) ~ log(nox) + log(dist) + rooms + I(rooms^2) +
@@ -241,13 +241,13 @@ stargazer(lm6.2,type = "text")
 
 ```
 
-## Interpretation
+**Interpretation **
 
 - if both $x$ and $x^2$ are in the regression, the coefficient on $x$ does not capture the full effect of *x* on *y*
 
 - you must use the basic regression results to calculate the full effect
 
-### Compute marginal effects 
+# Marginal effects 
 
 - When using the quadratic form of *x* in a regression, `lm(y ~ x + I(x^2))`, the **marginal effect** of *x* on *y* changes as the value of *x* changes. 
 
@@ -295,7 +295,7 @@ precisely estimated.
 
 - This allows for regressors to have an additional effect on the dependent variable
 
-## Interpretation 
+**Interpretation** 
 
 - The typical interpretation formula does not apply. You cannot say, "On average,
 a 1 unit increase in *X* results in a $\hat\beta_X$ unit increase in *Y*." *Why?* because the average increase in *Y* is not the same for at all values of *X*.
@@ -306,7 +306,7 @@ a 1 unit increase in *X* results in a $\hat\beta_X$ unit increase in *Y*." *Why?
 
 $$ \hat\beta_{xvar1} + (2 * \hat\beta_{xvar1:xvar2}) * some.xvar2.value $$
 
-## Compute Average Partial Effect
+# Average Partial Effect
 
 - To calculate *any* partial effect of *x1* on *y*, you
 can specify *any* value for *x2*. 
@@ -351,88 +351,174 @@ average GPA, a 10`%` increase in their attendance rate is associated with a
 # Predictions
 
 - Use the saved estimated coefficients from the regression to calcuate the
-predicted *Y* for a specified set of *X* values.
-
-## Example 6.5
-``` {r}
-
-lm6.5 <- lm(colgpa ~ sat + hsperc + hsize + I(hsize^2),data=gpa2)
-stargazer(lm6.5,type = "text")
-
-xvalues <- data.frame(sat=1200, hsperc=30, hsize=5)
-pred1 <-predict(lm6.5, xvalues)
-
-```
-
-When the regressors are set to `r as_tibble(xvalues)` the predicted college GPA is **`r pred1`**.
-
-# Multiple predictions
+predicted *Y* for a specified set of *X* values
 
 - Several predictions can be calculated at the same time by creating
 a dataset that contains input values for each regressor.
 
 - the `fitted()` command is a special instance of `predict()`, where the full dataset is used as the *x* input values for predictions
 
-## Example 6.5 multiple predictions
+- In R, you can use `cbind(xvalues,predictions)` to create a table that displays the input values next to the resulting predicted values.
+
+### Example 6.5
 ``` {r}
+
+# Run the regression
+lm6.5 <- lm(colgpa ~ sat + hsperc + hsize + I(hsize^2),data=gpa2)
+
+# set up forsingle prediction
+xvalues1 <- data.frame(sat=1200, hsperc=30, hsize=5)
+pred1 <-predict(lm6.5, xvalues1)
+results <- cbind(xvalues1,pred1)
+results
+
+# set up for multiple predictions
 xvalues <- data.frame(sat=c(1100,1100,1300,1300),
                       hsize=c(3,5,3,5),
                       hsperc=c(30,30,30,30) 
                       )
 
 pred.mult <- as.data.frame(predict(lm6.5, xvalues))
-pred.mult
+results <- cbind(xvalues,pred.mult)
+results
 ```
 
-- In R, you can use `cbind(xvalues,predictions)` to create a table that displays the input values next to the resulting predicted values.
+
+# Add Confidence Intervals
+
+- Use `predict(, interval = "confidence")`
+- To add the upper and 
+lower bounds of the confidence interval to the point-estimate 
+- The default is 95`%`
 
 ``` {r}
+
+# Run the regression
+lm6.5 <- lm(colgpa ~ sat + hsperc + hsize + I(hsize^2),data=gpa2)
+
+# set up forsingle prediction
+xvalues1 <- data.frame(sat=1200, hsperc=30, hsize=5)
+pred1 <-predict(lm6.5, xvalues1, interval = "confidence")
+results <- cbind(xvalues1,pred1)
+results
+
+# set up for multiple predictions
+xvalues <- data.frame(sat=c(1100,1100,1300,1300),
+                      hsize=c(3,5,3,5),
+                      hsperc=c(30,30,30,30) 
+                      )
+
+pred.mult <- (predict(lm6.5, xvalues, interval = "confidence"))
 
 results <- cbind(xvalues,pred.mult)
-
-as_tibble(results)
+results
 ```
 
 
-# Confidence Intervals
+# Wide Confidence Interval
 
-## Use `predict(, interval = "confidence")`
-- To include the predicted value as well as the upper and 
-lower bounds of the confidence interval. The default is 95`%`.
+- Use `predict(, interval = "predict")`
 
-## Example 6.5 continued
-``` {r}
-pred1.ci <- as.data.frame(predict(lm6.5, xvalues, interval = "confidence"))
-pred1.ci
-```
-
-# Confidence Intervals for point estimates
-
-## Use `predict(, interval = "predict")`
-
-- to obtain the confidence interval for the predicted *Y* for an individual 
+- to obtain the confidence interval for the predicted *Y* 
+for an **individual** observation 
 with the values of *X*
+
 - the CI for an individual (point) prediction is much wider than the CI for
 the average prediction.
 
 ### Example 6.6 Prediction Intervals for an individual
-These intervals are
+
 ``` {r}
-xvalues <- data.frame(sat=c(1200,900,1400), 
-                      hsperc=c(30,20,5), 
-                      hsize=c(5,3,1))
+pred.wide  <- predict(lm6.5, xvalues, interval = "predict")
 
-pred.point  <- predict(lm6.5, xvalues, interval = "predict")
+# You can view the estimates and the CI in a compact table this way:
+results.wide <- cbind(xvalues,pred.wide)
 
-results <- cbind(xvalues,pred.point)
-results
-
+results.wide
 
 ```
 
-# Predictions from log models
 
-## Predict when log(y)
+# Calculating CI by Hand
+
+The predict() command is quite easy. It performs all five of the steps
+that you normally have to do to compute the CI for a prediction by hand: 
+
+1. Run a new regression that subtracts the input values from the variables
+  - this tricks the regression into providing the *se* of the point-estimate for you
+2. $\hat\beta$ for the constant from this new regression is the point-estimate
+3. The $se_{\hat\beta}$ from the constant is what is needed in the CI formula
+4. Look up the *tvalue* for 95% CI with df = n-k-1.
+5. Plug these numbers into the CI formula and calculate the lower and upper CI by hand. 
+
+
+Here is an example. Suppose you want to estimate the price of a house
+that has lotsize = 10,000, 2,300 sf, and 4 bedrooms.
+
+Step 1: Run a new regression.
+```{r}
+# Subtract the input values for each variable from
+# the variable in the regression.
+lm1 <- lm(price ~ 
+                I(lotsize - 10000) +
+                I(sqrft - 2300) +
+                I(bdrms - 4), data = hprice1)
+
+# Save the regression results 
+b      <- summary(lm1)$coef[,1]  # estimated coefficient (beta_hat)
+se     <- summary(lm1)$coef[,2]  # se of the estimated coefficient
+
+```
+
+
+Step 2 & 3. Obtain the point-estimate and se for the price of a house with these
+characteristics from the constant in
+the estimated regression. 
+
+```{r}
+
+# Get the point-estimate of the prediction and the se from the Constant
+point.estimate <- b["(Intercept)"]
+se <- se["(Intercept)"]
+
+```
+
+- **$\hat\theta$ = `r point.estimate`**
+- **$se_{\hat\theta}$ = `r se`**
+
+Step 4. Find the *tval* for a 95% confidence interval with df = 84 (n-k-1) (using  `qt(alpha/2,df)` command in `R` 
+
+```{r}
+
+# Obtain the tval
+alpha <- 0.05
+tval <- abs(qt(alpha/2,88-3-1))
+
+```
+- **tval = `r tval`**
+
+Step 5. Use the standard confidence interval formula to calculate the CI:
+$$\hat\theta \pm
+t_{\alpha/2,df=n-k-1} * se_{\hat\beta_{Intercept}}$$
+
+```{r}
+# Calculate the CI
+lowerci <- round(point.estimate - (tval*se),2)
+upperci <- round(point.estimate + (tval*se),2)
+
+```
+
+** Use the results inline in the write-up.**
+
+$$`r point.estimate` \pm `r tval` * `r se`$$
+The confidence interval for expected price (in thousands) for houses with these characteristics as **[$`r lowerci`, $`r upperci`]**.
+
+As a reminder, you will usually simply use the `predict()` command.
+However, it is good to know how to calculate a CI by hand 
+and you will be asked to do this in your HW.
+
+
+# Prediction with log(y)
 
 - Predicting log(y) is straigtforward: $\hat{log(y)} = \hat\beta_x * x$
 - You cannot predict *y* by "un-logging" the predicted *log(y)*
@@ -468,7 +554,9 @@ as_tibble(mydata %>% select(price,price.hat,nox,rooms))
 
 ```
 
-# Your turn: Example 6.7 CEO Salaries
+# Your turn:
+
+**Example 6.7 CEO Salaries**
 
 - Use following code chunk to predict $\hat{salary}$ from $\hat{log(salary)}$ 
 - Use the steps above with the example in the book on pg. 207.
@@ -512,9 +600,9 @@ as_tibble(mydata %>% select(salary, sal.hat, sales, mktval, ceoten) )
 
 ```
 
-# Re-cap: Key Concepts
+# Re-cap
 
-Post-estimation Computations
+Three uses of Post-estimation Computations
 
 **1. Interpret**
 
