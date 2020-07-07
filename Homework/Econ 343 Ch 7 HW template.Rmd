@@ -45,9 +45,9 @@ options(digits=4)   # limits number of decimals to 4 when printing
 knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
 ```
 
-**Instructions: **
+**Instructions:**
 
-- The primary learning objective for this HW is dummy variable interpretation.
+- The primary learning objective for this HW is interpreting dummy variables.
 - Answer all questions that are listed after an R chunk.
 - Each question is worth 10 points (Total 50 pts)
 
