@@ -8,9 +8,9 @@ This repository contains the most up to date version of the Lecture, Homework te
 - Download the .Rmd file to your computer and then upload to Rstudio
 
 
-**Index of R commands introduced in each chapter lecture.Rmd file**
+**Index of R commands introduced in each "Ch X R Lecture.Rmd file"**
 
-Ch 2 R Lecture
+Ch 2 R Lecture.Rmd
 
 - gf_histogram() for distributions of one variable
 - gf_point()     for scatter plots of two variables
@@ -20,7 +20,7 @@ Ch 2 R Lecture
 - fitted()       to save the predicted values from the regression ($\hat{y}$)
 
 
-Ch 3 R Lecture
+Ch 3 R Lecture.Rmd
 
 - mutate():      to add variables to your dataset*
 - cor():         for the correlation between two or more variables
@@ -29,13 +29,13 @@ Ch 3 R Lecture
 - plot(resid()): to plot residuals
 
 
-Ch 4 R Lecture
+Ch 4 R Lecture.Rmd
 
 - `summary()` to save the regression results
 - r inline mini-chunk to display a regression result, or other computation
 - linearHypothesis()  to conduct F-tests on regressions
 
-Ch 6 R Lecture
+Ch 6 R Lecture.Rmd
 
 - I()
 - scale()
