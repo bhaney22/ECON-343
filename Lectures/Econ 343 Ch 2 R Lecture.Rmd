@@ -44,7 +44,7 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 ```
 # Ch 02 Example
 
-### Commands used in this example:
+### R Commands demonstrated in this lecture:
 - gf_point() for scatter plots
 - gf_histogram()
 - lm()
@@ -66,8 +66,6 @@ gf_histogram(~educ,data=mydata)
 gf_point(wage ~ educ,data=mydata)
 cor(mydata$wage,mydata$educ)
 
-# Want to know more about graphing in R? Run the following command in the console:
-# learnr::run_tutorial("introduction", package = "ggformula")
 ```
 
 

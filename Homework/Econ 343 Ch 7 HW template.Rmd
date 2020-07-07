@@ -1,0 +1,216 @@
+---
+title: "Econ 343 Ch 7 HW Lastname, firstname"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+**Instructions: **
+
+- The primary learning objective for this HW is dummy variable interpretation.
+- Answer all questions that are listed after an R chunk.
+- Each question is worth 10 points (Total 50 pts)
+
+- The R commands you need to answer the Cengage HW are provided. 
+- Don't forget to load your own **unique dataset from Cengage**.
+- Note that in this template you will find:
+  - a new R command: **confint()**: provides confidence intervals for estimated parameters
+  - more examples of using **mydata <- mydata %>% mutate()** command to create new variables
+  - an example of best practices for naming lm() models
+
+
+# Ch. 7 C4 Athletes and GPA
+
+## Part (ii) and (iii)
+``` {r}
+
+mydata <- gpa2
+
+lm7.4ii <- lm(colgpa ~ hsize + I(hsize^2) + hsperc + sat + female + athlete, data = mydata)
+
+lm7.4iii <- lm(colgpa ~ hsize + I(hsize^2) + hsperc + female + athlete, data = mydata)
+
+stargazer(lm7.4ii,lm7.4iii,type = "text")
+
+```
+
+**1. Describe and interpret what happens to the coefficient on *female* when *sat* is removed from the regression. ** 
+
+
+## Part (iv)
+``` {r}
+
+mydata <- mydata %>%
+  mutate(femath = if_else(female == 1 & athlete == 1, 1, 0),
+         maleath = if_else(female == 0 & athlete == 1, 1, 0),
+         malenoath = if_else(female == 0 & athlete == 0, 1, 0))
+
+lm7.4iv <- lm(colgpa ~ hsize + I(hsize^2) + hsperc + sat + 
+                femath + maleath + malenoath, data = mydata)
+
+
+stargazer(lm7.4iv,type = "text")
+
+```
+
+**2. Provide an interpretation for the estimated coefficient on *malenoath*. **
+
+
+## Part (v)
+
+``` {r}
+mydata<- mydata %>%
+  mutate(femsat = female * sat)
+  
+lm7.4v <- lm(colgpa ~ hsize + I(hsize^2) + hsperc + sat + 
+               female + femsat + athlete, data = mydata)
+stargazer(lm7.4v,type = "text")
+
+```
+
+**3. What is the hypothesis and results of that hupothesis that the coefficient on *femsat* tests?**
+
+
+
+# Ch. 7 C8 Mortgage Approval Rates Linear Probability Model (LPM)
+
+## Part (ii)
+
+``` {r}
+lm7.8ii <- lm(approve ~ white, data = loanapp)
+stargazer(lm7.8ii,type = "text")
+
+```
+
+
+
+## Part (iii)
+
+``` {r}
+lm7.8iii <- lm(approve ~ white + hrat + obrat + loanprc + unem + male + married + dep + 
+                 sch + cosign + chist + pubrec + mortlat1 + + mortlat2 + vr, data = loanapp)
+stargazer(lm7.8ii, lm7.8iii,type = "text")
+
+```
+
+## Part (iv)
+
+``` {r}
+lm7.8iv <- lm(approve ~ white + hrat + obrat + I(white*obrat) + loanprc + unem + male +
+                married + dep + sch + 
+                cosign + chist + pubrec + mortlat1 + + mortlat2 + vr, data = loanapp)
+stargazer(lm7.8iii,lm7.8iv,type = "text")
+
+```
+
+
+**4. What is the interpretation of the coefficient on *obrat*?**
+
+
+## Part (v)
+
+``` {r}
+lm7.8v <- lm(approve ~ white + hrat + obrat + I(white*(obrat-32)) + loanprc + unem + male +
+               married + dep + sch + 
+               cosign + chist + pubrec + mortlat1 + + mortlat2 + vr, data = loanapp)
+stargazer(lm7.8iv,lm7.8v, type = "text")
+
+ci.lm7.8v <- confint(lm7.8v)
+ci.lm7.8v
+
+```
+
+
+# Ch. 7 C10 NBA Salaries
+
+## Part (i)
+
+``` {r}
+
+mydata <- nbasal
+lm7.10i <- lm(points ~ exper + I(exper^2) + guard + forward, data = mydata)
+
+stargazer(lm7.10i,type = "text")
+
+
+
+```
+
+**5. Interpret the coefficient on *forward*.**
+
+## Part (iv)
+
+``` {r}
+lm7.10iv <- lm(points ~ exper + I(exper^2) + guard + forward + marr, data = mydata)
+
+stargazer(lm7.10i,lm7.10iv,type = "text")
+
+```
+
+
+## Part (v)
+
+``` {r}
+
+lm7.10v <- lm(points ~ exper + I(exper^2) + guard + forward + marr + 
+                I(marr*exper) + I(marr*exper^2), data = mydata)
+
+stargazer(lm7.10iv,lm7.10v,type = "text")
+
+h1 <- linearHypothesis(lm7.10v,c("marr = 0","I(marr * exper) = 0", "I(marr * exper^2) = 0"))
+h1
+
+```
+
+## Part (vi)
+
+``` {r}
+
+lm7.10vi <- lm(assists ~ exper + I(exper^2) + guard + forward + marr, data = mydata)
+
+stargazer(lm7.10vi,type = "text")
+
+```
+
+
+

@@ -1,11 +1,15 @@
 ---
-title: "Econ 343 Ch 6 Report Lastname, firstname"
+title: "Econ 343 Ch  7 R Lecture"
 output:
-  pdf_document: default
   html_document:
-    df_print: paged
-  word_document: default
+    number_sections: no
+    toc: yes
+    toc_collapsed: yes
+    toc_float: yes
+    toc_levels: 3
   beamer_presentation: default
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -45,34 +49,7 @@ options(digits=4)   # limits number of decimals to 4 when printing
 knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
 ```
 
-Instructions: 
+# Key Concepts
 
-- Save your commands and show all work for the Cengage computer exercises
-- the variable names should make it obvious what you are computing
-- You do not need to add additional interpretation 
-
-# Ch. 6 C1
-
-``` {r}
-
-
-```
-
-
-# Ch. 6 C8
-
-``` {r}
-
-
-```
-
-
-
-# Ch. 6 C13
-
-``` {r}
-
-
-```
 
 
