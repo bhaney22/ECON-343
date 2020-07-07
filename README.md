@@ -1,5 +1,5 @@
 # ECON-343
-This repository contains the most up to date versions of Rmarkdown files for Lectures, HW templates, adn the Empirical Project.
+This repository contains the most up to date versions of Rmarkdown files for Lectures, HW templates, and the Empirical Project.
 
 **Instructions**
 - Scroll up and click on the name of the folder (Lectures, Homework, or Empircal Project).
