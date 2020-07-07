@@ -8,7 +8,7 @@ This repository contains the most up to date version of the Lecture, Homework te
 - Download the .Rmd file to your computer and then upload to Rstudio
 
 
-**R commands introduced in each chapter lecture**
+**Index of R commands introduced in each chapter lecture**
 
 Ch 2 R Lecture
 
