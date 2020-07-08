@@ -9,7 +9,7 @@ This repository contains the most up to date version of the Lecture, Homework te
   - Save the new file with the correct name and give it a **.Rmd** file extension
 
 
-**Index of R commands introduced in each "Ch X R Lecture.Rmd file"**
+**See below for an index of R commands introduced in each Ch 00 R Lecture.Rmd file**
 
 Ch 2 R Lecture.Rmd
 
