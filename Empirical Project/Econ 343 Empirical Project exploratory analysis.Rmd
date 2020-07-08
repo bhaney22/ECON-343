@@ -69,7 +69,7 @@ stargazer(mygss,type="text",
           digits = 0, 
           summary.stat = c("n","min","max","median","mean","sd"))
 
-
+as_tibble(mygss)
 ```
 
 
@@ -141,23 +141,23 @@ Usage:
 ```{r}
 
 # Demographic variables...
-mygss$RINCOME <- mis_val(mygss$RINCOME,c(0,13,98,99), with_labels = TRUE)
-mygss$INCOME  <- mis_val(mygss$INCOME,c(0,13,98,99), with_labels = TRUE)
-mygss$WEALTH  <- mis_val(mygss$WEALTH,c(0,98,99), with_labels = TRUE)
-mygss$AGE     <- mis_val(mygss$AGE,c(98,99), with_labels = TRUE)
-mygss$EDUC    <- mis_val(mygss$EDUC,c(97,98,99), with_labels = TRUE)
-mygss$RACE    <- mis_val(mygss$RACE, 0, with_labels = TRUE)
-mygss$DEGREE  <- mis_val(mygss$DEGREE, c(7,8,9), with_labels = TRUE)
-mygss$MARITAL <- mis_val(mygss$MARITAL, c(9), with_labels = TRUE)
-mygss$CHILDS  <- mis_val(mygss$CHILDS, c(9), with_labels = TRUE)
-mygss$WRKSTAT <- mis_val(mygss$WRKSTAT, c(0,9), with_labels = TRUE)
-mygss$REGION  <- mis_val(mygss$REGION, c(0), with_labels = TRUE)
-mygss$PARTYID <- mis_val(mygss$PARTYID, c(8,9), with_labels = TRUE)
-mygss$PRES16  <- mis_val(mygss$PRES16, c(0,3,4,8,9), with_labels = TRUE)
-mygss$COURTS  <- mis_val(mygss$COURTS, c(0,8,9), with_labels = TRUE)
-mygss$NATEDUC <- mis_val(mygss$NATEDUC, c(0,8,9), with_labels = TRUE)
-mygss$NATFARE <- mis_val(mygss$NATFARE, c(0,8,9), with_labels = TRUE)
-mygss$TAX     <- mis_val(mygss$TAX, c(0,8,9,4), with_labels = TRUE)
+mygss$RINCOME <- mis_val(mygss$RINCOME,c(0,13,98,99))
+mygss$INCOME  <- mis_val(mygss$INCOME,c(0,13,98,99))
+mygss$WEALTH  <- mis_val(mygss$WEALTH,c(0,98,99))
+mygss$AGE     <- mis_val(mygss$AGE,c(98,99))
+mygss$EDUC    <- mis_val(mygss$EDUC,c(97,98,99))
+mygss$RACE    <- mis_val(mygss$RACE, 0)
+mygss$DEGREE  <- mis_val(mygss$DEGREE, c(7,8,9))
+mygss$MARITAL <- mis_val(mygss$MARITAL, c(9))
+mygss$CHILDS  <- mis_val(mygss$CHILDS, c(9))
+mygss$WRKSTAT <- mis_val(mygss$WRKSTAT, c(0,9))
+mygss$REGION  <- mis_val(mygss$REGION, c(0),)
+mygss$PARTYID <- mis_val(mygss$PARTYID, c(8,9))
+mygss$PRES16  <- mis_val(mygss$PRES16, c(0,3,4,8,9))
+mygss$COURTS  <- mis_val(mygss$COURTS, c(0,8,9))
+mygss$NATEDUC <- mis_val(mygss$NATEDUC, c(0,8,9))
+mygss$NATFARE <- mis_val(mygss$NATFARE, c(0,8,9))
+mygss$TAX     <- mis_val(mygss$TAX, c(0,8,9,4))
 
 
 ```
