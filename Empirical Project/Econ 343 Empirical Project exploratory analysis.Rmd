@@ -60,7 +60,7 @@ https://gss.norc.org/get-the-data/spss
 5. You can add more variables from the GSS by adding them to the "select" statement
 
 ```{r}
-mygss <- as.data.frame(read_sav("~/20SU ECON 343/Empirical Project/GSS/GSS2018.sav")) %>%
+mygss <- as.data.frame(read_sav("~/ECON 343/Empirical Project/GSS/GSS2018.sav")) %>%
   select(YEAR,ID,WRKSTAT,SEX,RACE,RINCOME,INCOME,WEALTH,REGION,
          AGE,MARITAL,CHILDS,EDUC,DEGREE,
          PARTYID,PRES16,NATEDUC,COURTS,TAX,NATFARE) 
@@ -203,7 +203,7 @@ mygss <- mygss %>%
                            PARTYID >= 2 & PARTYID <= 4 ~ 3,      
                            PARTYID == 7 ~ 3),
          
-         region   = case_when(REGION == 1 | REGION == 2 ~ 1,     
+         region = case_when(REGION == 1 | REGION == 2 ~ 1,     
                               REGION == 3 | REGION == 4 ~ 2,    
                               REGION == 5 | REGION == 6 | REGION == 7 ~ 3, 
                               REGION == 8 | REGION == 9 ~ 4),    
