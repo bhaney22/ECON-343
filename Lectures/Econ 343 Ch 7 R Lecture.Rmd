@@ -51,11 +51,241 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 
 # Ch 7 R Lecture
 
-### R commands introduced in this lecture
-- TBA
+### R commands reviewed in this lecture
+- 'mydata <- mydata %>% mutate( newvar = case_when(oldvar == 0 ~ 0,'
+  '                                                oldvar >  0 ~ 1))'
 
 
 # Key Concepts
+
+- Using and interpreting dummy regressors
+- Using dummy variable as the dependent variable
+  - _Linear Probability Model_ 
+  - similar to using a log(y) as a dependent variable
+- Interaction terms between dummy variables
+- Interaction terms between dummy and quantitative variables
+- Creating dummy variables
+
+
+# Different intercepts by category
+
+**Economic Question** Does a negative return on stock affect CEO salary?
+
+```{r}
+mydata <- ceosal1 %>% select(salary, sales, roe, ros)
+
+# use mutate to create dummy variable
+mydata <- mydata %>% 
+  mutate(rosneg = case_when(ros < 0 ~ 1,
+                            ros >= 0 ~ 0))
+# run the regression
+lm1 <- lm(log(salary) ~ log(sales) + roe + rosneg, data = mydata)
+
+model  <- lm1
+b      <- summary(model)$coef[,1]           # estimated coefficient (beta_hat)
+se     <- summary(model)$coef[,2]           # se of the estimated coefficient
+tstat  <- summary(model)$coef[,3]           # t-stat computed by r
+pval   <- summary(model)$coef[,4]           # p-value for H0: beta = 0 (two-sided alternative)
+
+stargazer(lm1,type="text")
+
+```
+
+
+**Explanation** Remember that the intercept (**Constant**) represents the average *log(salary)* when *roe*=0 and *ros=0*. The coefficient on the dummy variable adds to the intercept when *ros* takes on any negative value. So, for CEOs with a negative value for *ros*, their average *log(salary)* is
+$\hat\beta_0 + \hat\beta_{rosneg}$ = 
+`r b["(Intercept)"]` + `r b["rosneg"]` = 
+**`r b["(Intercept)"]  +  b["rosneg"]`**.
+
+Typically, only the coefficient on the dummy variable is reported and it is interpreted as
+the difference in the average salary between CEOs with positive vs. negative *ros*:
+
+**Write-up** Negative *ros* does have a statistically significant impact on CEO salaries. The coefficient on *rosneg* implies that if the CEO’s firm had a negative return on its stock over the 1988 to 1990 period, the CEO salary was predicted to be about `r b["rosneg"]*100`% lower, for given levels of *sales* and *roe*.  The p-value=`r pval["rosneg"]`, which is significant at the 5% level against a two-sided alternative.
+
+
+
+# Different Slopes by category
+
+**Economic question** Do years of education impact wages differently by gender? 
+
+```{r}
+mydata <- wage1
+
+lm2  <- lm(log(wage) ~ female + educ + female*educ + 
+             exper + I(exper^2) + 
+             tenure + I(tenure^2),mydata)
+
+stargazer(lm2,type="text")
+
+model <- lm2
+b      <- summary(model)$coef[,1]           # estimated coefficient (beta_hat)
+se     <- summary(model)$coef[,2]           # se of the estimated coefficient
+tstat  <- summary(model)$coef[,3]           # t-stat computed by r
+pval   <- summary(model)$coef[,4]           # p-value for H0: beta = 0 (two-sided alternative)
+
+```
+
+**Write-up** For each additional year of education, men's wages change on average 
+by $\hat{\beta_{educ}}$ = **`r b["educ"]`**. 
+
+The difference for women's wage change is  on average 
+by $\hat\{beta_{educ}}$ + $\hat{\beta_{female X educ}}$: **`r b["educ"] + b["female:educ"]`**, 
+controlling for experience and tenure.
+
+
+However, the difference is not statistically significant. 
+This is likely because these coefficients pertain to gender differences when educ=0.
+
+# Use mean regressions with dummies
+
+By subtracting the mean of education from *educ* and *female X educ*, the coefficients
+are more meaningful:
+
+- the *intercept* represents that average wage for male workers with 12 years of education and no experience
+
+- $\hat\beta_{female}$ is the difference in average wage between men and women with 12 years of education and no experience
+
+- $\hat\beta_{educ}$ is the average increase in men's wages for an additional year of school, , holding experience and tenure constant
+
+- $\hat\beta_{femaleXeduc}$ is the difference in the average increase in women's wages for an additional year of school, holding experience and tenure constant
+
+```{r}
+mydata <- wage1
+
+lm3  <- lm(log(wage) ~ female + I(educ - mean(educ)) + I(female*(educ - mean(educ))) + 
+             exper + I(exper^2) + 
+             tenure + I(tenure^2),mydata)
+
+stargazer(lm3,type="text")
+
+model <- lm3
+b      <- summary(model)$coef[,1]           # estimated coefficient (beta_hat)
+se     <- summary(model)$coef[,2]           # se of the estimated coefficient
+tstat  <- summary(model)$coef[,3]           # t-stat computed by r
+pval   <- summary(model)$coef[,4]           # p-value for H0: beta = 0 (two-sided alternative)
+
+```
+
+**Write-up** For workers with a typical level of education, educ = `r mean(mydata$educ)` years, the average wage is  **$\hat{\beta_0}$ = ** **`r b["(Intercept)"]`** and the gender difference is:
+
+**$\hat\beta_{female}$ =** **`r  b["female"]`**, both of which are now strongly statistically significant.
+
+The gender difference in the slope coefficient on *educ* is the roughly the same and is still not statistically significant.
+
+
+
+
+# Linear Probability Model
+
+A dummy dependent variable takes on the value of "0" or "1". However, the predicted values from
+the regression represent a probability, somewhere between 0 and 1, of belonging to the category. Regression coefficients represent the change in percentage points of the probability of belonging to the category. In this sense, interpretation in LPM is similar to that of log(y) dependent variables.
+
+It is easier to explain with an example.
+
+**Economic question**
+
+From Ch 7 Computer Exercise C13: Does the price difference 
+between eco- and non-eco-friendly apples affect whether consumers by eco-friendly apples or not?
+
+Frequently, you will create the dummy dependent variable by recoding a quantitative variable. 
+
+```{r}
+mydata <- apple
+mydata <- mydata %>%
+  mutate(ecobuy = case_when(ecolbs == 0 ~ 0,
+                            ecolbs  > 0 ~ 1))
+stargazer(mydata,type="text")
+```
+
+**REMINDER: The mean of a dummy variable is the percent of observations with a value of "1".**
+
+In this sample, **62% of families bought eco-friendly apples.**
+
+2. Run the LPM regression, using the dummy as the dependent variable. Save the results for
+post-estimation computations.
+
+```{r}
+lm7.13 <- lm(ecobuy ~ ecoprc + regprc + faminc + hhsize + educ + age, data=mydata)
+stargazer(lm7.13,type="text")
+
+```
+
+**Write-up** The primary regressor is the price of apples, eco- and non-eco apples. If the price of eco-friendly apples (*ecoprc*) in dollars increases by, say, 10 cents (.10 dollars), then the probability of buying eco-labeled apples *falls* by about .10 $\cdot$ (`r b["ecoprc"]`) = `r .1*b["ecoprc"]` percentage points.
+
+If *regprc* increases by 10 cents, the probability of buying eco-labeled apples *increases* by about .10 $\cdot$ `r b["regprc"]` = `r .1 * b["regprc"]` percentage points.  
+
+Note: We must assume that the predicted probabilities 
+are not close to the boundaries of zero and one. The next step checks this assumption.
+
+# LPM: Check predicted probabilities
+
+- predicted $\hat{y}$ are predicted probabilities 
+  - one concern researchers have about LPM is that it allows invalid predictions (negative or greater than 1)
+  - but, the predictions (*fitted()* values) can be checked
+  - if there are no or only a few negative or greater than 1 fitted values there is generally no cause for concern
+
+```{r}
+# Get the "y-hats"
+# Recode y-hats to be dummy y_hat (take on 0/1 values only)
+
+mydata <- mydata %>%
+  mutate(yhat  = fitted(lm7.13),
+         yhat_dummy = case_when(yhat >= .5 ~ 1,
+                                yhat  < .5 ~ 0))
+
+range_yhat <- range(mydata$yhat)
+gt1_yhat   <- count(mydata$yhat > 1)
+cro_cpct(mydata$ecobuy, mydata$yhat_dummy)
+
+range_yhat[1]
+range_yhat[2]
+gt1_yhat
+
+
+                            
+```
+
+**Write-up** The fitted probabilities range from `r range_yhat[1]` to `r range_yhat[2]`, so none are negative.  
+There are `r gt1_yhat` predicted probabilities above 1, which is not a source of concern with 660 observations.
+
+
+# LPM Compare actual to predicted probabilities
+
+**Evaluate the LPM model: How well does this model predict eco-buying behavior?**
+
+```{r}
+# create a variable that determines if the predicted y_hat was correct or not
+mydata <- mydata %>%
+  mutate(correct_pred = case_when(yhat_dummy == ecobuy ~ 1,
+                                  yhat_dummy != ecobuy ~ 0))
+
+# overall correct prediction rate
+Pct_correct_pred <- mean(mydata$correct_pred)
+
+# percent of ecobuyers correctly predicted
+Pct_correct_pred_ecobuy <- mean(mydata$correct_pred[mydata$ecobuy == 1])
+
+# percent of non-ecobuyers correctly predicted
+Pct_correct_pred_noecobuy <- mean(mydata$correct_pred[mydata$ecobuy == 0])
+
+Pct_correct_pred
+Pct_correct_pred_ecobuy
+Pct_correct_pred_noecobuy
+                            
+```
+
+**Write-up** This model does a decent job at predicting eco-buying behavior. But, much better for predicting those who do buy eco-friendly apples, vs. those who won't.
+
+- Use the standard prediction rule – $\hat{y}_{dummy}$ = 1 if $\hat{y}$ > or = .5 and zero otherwise.
+
+- The overall percent correctly predicted is **`r Pct_correct_pred*100`%.**
+
+- The percent correctly predicted for those who are ecobuyers is
+**`r Pct_correct_pred_ecobuy*100`%**.   
+
+- The fraction correctly predicted for non-ecobuyers is **`r Pct_correct_pred_noecobuy*100`**%.  
+
+Thus, using the usual prediction rule, the model predicts which consumers will *buy* eco-labeled apples about twice as accurately as it predicts that consumers will not buy eco-apples. 
 
 
 
