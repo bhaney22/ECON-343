@@ -60,7 +60,7 @@ https://gss.norc.org/get-the-data/spss
 5. You can add more variables from the GSS by adding them to the "select" statement
 
 ```{r}
-mygss <- as.data.frame(read_sav("~/ECON 343/Empirical Project/GSS/GSS2018.sav")) %>%
+mygss <- as.data.frame(read_sav("GSS/GSS2018.sav")) %>%
   select(YEAR,ID,WRKSTAT,SEX,RACE,RINCOME,INCOME,WEALTH,REGION,
          AGE,MARITAL,CHILDS,EDUC,DEGREE,
          PARTYID,PRES16,NATEDUC,COURTS,TAX,NATFARE) 
@@ -146,18 +146,20 @@ mygss$INCOME  <- mis_val(mygss$INCOME,c(0,13,98,99))
 mygss$WEALTH  <- mis_val(mygss$WEALTH,c(0,98,99))
 mygss$AGE     <- mis_val(mygss$AGE,c(98,99))
 mygss$EDUC    <- mis_val(mygss$EDUC,c(97,98,99))
-mygss$RACE    <- mis_val(mygss$RACE, 0)
+mygss$RACE    <- mis_val(mygss$RACE, 0, with_labels = TRUE)
 mygss$DEGREE  <- mis_val(mygss$DEGREE, c(7,8,9))
 mygss$MARITAL <- mis_val(mygss$MARITAL, c(9))
 mygss$CHILDS  <- mis_val(mygss$CHILDS, c(9))
 mygss$WRKSTAT <- mis_val(mygss$WRKSTAT, c(0,9))
 mygss$REGION  <- mis_val(mygss$REGION, c(0),)
-mygss$PARTYID <- mis_val(mygss$PARTYID, c(8,9))
-mygss$PRES16  <- mis_val(mygss$PRES16, c(0,3,4,8,9))
-mygss$COURTS  <- mis_val(mygss$COURTS, c(0,8,9))
-mygss$NATEDUC <- mis_val(mygss$NATEDUC, c(0,8,9))
-mygss$NATFARE <- mis_val(mygss$NATFARE, c(0,8,9))
-mygss$TAX     <- mis_val(mygss$TAX, c(0,8,9,4))
+# mygss$PARTYID <- mis_val(mygss$PARTYID, c(8,9), with_labels = TRUE)
+# to recreate ERROR (uncomment the above command and comment out the command below)
+mygss$PARTYID <- mis_val(mygss$PARTYID, c(8,9)) 
+mygss$PRES16  <- mis_val(mygss$PRES16, c(0,3,4,8,9), with_labels = TRUE)
+mygss$COURTS  <- mis_val(mygss$COURTS, c(0,8,9), with_labels = TRUE)
+mygss$NATEDUC <- mis_val(mygss$NATEDUC, c(0,8,9), with_labels = TRUE)
+mygss$NATFARE <- mis_val(mygss$NATFARE, c(0,8,9), with_labels = TRUE)
+mygss$TAX     <- mis_val(mygss$TAX, c(0,8,9,4), with_labels = TRUE)
 
 
 ```
@@ -353,6 +355,13 @@ cro_cpct(mygss$party)
 cro_cpct(mygss$PRES16)
 
 ```
+
+## Graphs
+
+```{r}
+gf_bar(~ party, data = mygss)
+```
+
 
 # Go! 
 
