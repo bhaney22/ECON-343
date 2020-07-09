@@ -52,8 +52,14 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 # Ch 7 R Lecture
 
 ### R commands reviewed in this lecture
-- 'mydata <- mydata %>% mutate( newvar = case_when(oldvar == 0 ~ 0,'
-  '                                                oldvar >  0 ~ 1))'
+
+`mydata <- mydata %>%`
+
+`mutate( newvar = case_when(`
+
+`oldvar == 0 ~ 0,`
+
+`oldvar >  0 ~ 1))`
 
 
 # Key Concepts
@@ -92,15 +98,14 @@ stargazer(lm1,type="text")
 ```
 
 
-**Explanation** Remember that the intercept (**Constant**) represents the average *log(salary)* when *roe*=0 and *ros=0*. The coefficient on the dummy variable adds to the intercept when *ros* takes on any negative value. So, for CEOs with a negative value for *ros*, their average *log(salary)* is
-$\hat\beta_0 + \hat\beta_{rosneg}$ = 
-`r b["(Intercept)"]` + `r b["rosneg"]` = 
-**`r b["(Intercept)"]  +  b["rosneg"]`**.
+**Explanation** Remember that the intercept (*Constant*) represents the average *log(salary)* when *roe=0* and *ros=0*. The coefficient on the dummy variable adds to the intercept when *ros* takes on any negative value. So, for CEOs with a negative value for *ros*, their average *log(salary)* is
+**$\hat\beta_0 + \hat\beta_{rosneg}$ = `r b["(Intercept)"]` + `r b["rosneg"]` = `r b["(Intercept)"]  +  b["rosneg"]`**.
 
 Typically, only the coefficient on the dummy variable is reported and it is interpreted as
 the difference in the average salary between CEOs with positive vs. negative *ros*:
 
-**Write-up** Negative *ros* does have a statistically significant impact on CEO salaries. The coefficient on *rosneg* implies that if the CEO’s firm had a negative return on its stock over the 1988 to 1990 period, the CEO salary was predicted to be about `r b["rosneg"]*100`% lower, for given levels of *sales* and *roe*.  The p-value=`r pval["rosneg"]`, which is significant at the 5% level against a two-sided alternative.
+**Write-up** Negative *ros* does have a statistically significant impact on CEO salaries. The coefficient on *rosneg* (**$\hat\beta_{rosneg}=$ `r b["rosneg"]`**) implies that if the CEO’s firm had a negative return on its stock over the 1988 to 1990 period, the CEO salary will
+be about **`r b["rosneg"]*100`**% lower on average, controlling for *sales* and *roe*.  The **p-value=`r pval["rosneg"]`** is significant at the 5% level.
 
 
 
@@ -125,29 +130,25 @@ pval   <- summary(model)$coef[,4]           # p-value for H0: beta = 0 (two-side
 
 ```
 
-**Write-up** For each additional year of education, men's wages change on average 
-by $\hat{\beta_{educ}}$ = **`r b["educ"]`**. 
+**Write-up** In the regression results,
 
-The difference for women's wage change is  on average 
-by $\hat\{beta_{educ}}$ + $\hat{\beta_{female X educ}}$: **`r b["educ"] + b["female:educ"]`**, 
-controlling for experience and tenure.
+- **$\hat\beta_{educ}$** is the slope on ***educ*** for men
 
+- **$\hat\beta_{femaleXeduc}$** is the difference in the slope on ***educ*** for women 
 
-However, the difference is not statistically significant. 
-This is likely because these coefficients pertain to gender differences when educ=0.
+For each additional year of education, men's wages change on average 
+by **$\hat{\beta_{educ}}$ = `r b["educ"]`**. 
+
+The difference in the slope for women is **$\hat{\beta_{female X educ}}$ = `r round(b["female:educ"],3)` (*se* = `r se["female:educ"]`)**.
+
+However, as seen by the standard error, the difference in the slope for women is not statistically significant. 
 
 # Use mean regressions with dummies
 
-By subtracting the mean of education from *educ* and *female X educ*, the coefficients
-are more meaningful:
+The lack of statistical significance for the coefficient on ***female*** is likely because this is the wage difference when **educ = 0**. That is not a reasonable value for education. 
 
-- the *intercept* represents that average wage for male workers with 12 years of education and no experience
+When a value of "0" for the quantitative variable in the interaction term is not reasonable, it is common practice to run the regressions at the mean of the explanatory variable. 
 
-- $\hat\beta_{female}$ is the difference in average wage between men and women with 12 years of education and no experience
-
-- $\hat\beta_{educ}$ is the average increase in men's wages for an additional year of school, , holding experience and tenure constant
-
-- $\hat\beta_{femaleXeduc}$ is the difference in the average increase in women's wages for an additional year of school, holding experience and tenure constant
 
 ```{r}
 mydata <- wage1
@@ -166,28 +167,31 @@ pval   <- summary(model)$coef[,4]           # p-value for H0: beta = 0 (two-side
 
 ```
 
-**Write-up** For workers with a typical level of education, educ = `r mean(mydata$educ)` years, the average wage is  **$\hat{\beta_0}$ = ** **`r b["(Intercept)"]`** and the gender difference is:
+**Write-up** Subtracting the mean(educ) from ***educ*** and from ***educ*** in the interaction term, the intercepts are more meaningful and more precisely estimated.
 
-**$\hat\beta_{female}$ =** **`r  b["female"]`**, both of which are now strongly statistically significant.
+- the **intercept** is the average wage for men who have **mean(educ)** years of education
 
-The gender difference in the slope coefficient on *educ* is the roughly the same and is still not statistically significant.
+- **$\hat\beta_{female}$** is the difference in average wages between men and women who have **mean(educ)** years of education
 
+For male workers with **educ = `r mean(mydata$educ)` years** the average wage is  **$\hat{\beta_0}$ = `r b["(Intercept)"]`**.
 
+The difference in average wages for women is: **$\hat\beta_{female}$ = `r  b["female"]`**, which is now strongly statistically significant.
 
+The gender difference in the slope coefficient on ***educ*** is the roughly the same and is still not statistically significant. It does not appear that the slope on ***educ*** is different for men and women.
 
 # Linear Probability Model
 
 A dummy dependent variable takes on the value of "0" or "1". However, the predicted values from
 the regression represent a probability, somewhere between 0 and 1, of belonging to the category. Regression coefficients represent the change in percentage points of the probability of belonging to the category. In this sense, interpretation in LPM is similar to that of log(y) dependent variables.
 
-It is easier to explain with an example.
+Here is an example.
 
 **Economic question**
 
-From Ch 7 Computer Exercise C13: Does the price difference 
+**Economic Question** (From Ch 7 Computer Exercise C13) Does the price difference 
 between eco- and non-eco-friendly apples affect whether consumers by eco-friendly apples or not?
 
-Frequently, you will create the dummy dependent variable by recoding a quantitative variable. 
+1. Frequently, you will start by creating the dummy dependent variable by recoding a quantitative variable. 
 
 ```{r}
 mydata <- apple
@@ -199,7 +203,7 @@ stargazer(mydata,type="text")
 
 **REMINDER: The mean of a dummy variable is the percent of observations with a value of "1".**
 
-In this sample, **62% of families bought eco-friendly apples.**
+In this sample, **62%** of families bought eco-friendly apples.
 
 2. Run the LPM regression, using the dummy as the dependent variable. Save the results for
 post-estimation computations.
@@ -208,16 +212,22 @@ post-estimation computations.
 lm7.13 <- lm(ecobuy ~ ecoprc + regprc + faminc + hhsize + educ + age, data=mydata)
 stargazer(lm7.13,type="text")
 
+b <- coef(lm7.13)
 ```
 
-**Write-up** The primary regressor is the price of apples, eco- and non-eco apples. If the price of eco-friendly apples (*ecoprc*) in dollars increases by, say, 10 cents (.10 dollars), then the probability of buying eco-labeled apples *falls* by about .10 $\cdot$ (`r b["ecoprc"]`) = `r .1*b["ecoprc"]` percentage points.
+**Write-up** The primary regressor we want to examine is price of eco- and non-eco apples. The coefficient on ***ecoprc*** (price of eco-friendly apples) 
+is **$\hat\beta_{ecoprc}$ = `r b["ecoprc"]`** dollars.  This means that if the price eco-apples is
+$0.10 higher than regular apples, then the probability of buying eco-labeled apples *falls* by
+**.10 * $\hat\beta_{ecoprc} * 100$ = `r 0.10 * b["ecoprc"] * 100` percentage points**.
 
-If *regprc* increases by 10 cents, the probability of buying eco-labeled apples *increases* by about .10 $\cdot$ `r b["regprc"]` = `r .1 * b["regprc"]` percentage points.  
+The coefficient on ***regprc*** (price of regular apples) 
+is **$\hat\beta_{regprc}$ = `r b["regprc"]`** dollars. If ***regprc*** increases by **10 cents**, the probability of buying eco-labeled apples **increases** by **.10 * $\hat\beta_{regprc}$ * 100 = `r 0.10 * b["regprc"] * 100` percentage points**.  
 
-Note: We must assume that the predicted probabilities 
-are not close to the boundaries of zero and one. The next step checks this assumption.
 
 # LPM: Check predicted probabilities
+
+Note: In the previous write-up, we must assume that the predicted probabilities 
+are not close to the boundaries of zero and one. The next step checks this assumption.
 
 - predicted $\hat{y}$ are predicted probabilities 
   - one concern researchers have about LPM is that it allows invalid predictions (negative or greater than 1)
