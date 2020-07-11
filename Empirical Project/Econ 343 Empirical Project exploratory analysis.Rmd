@@ -63,7 +63,8 @@ https://gss.norc.org/get-the-data/spss
 mygss <- as.data.frame(read_sav("GSS/GSS2018.sav")) %>%
   select(YEAR,ID,WRKSTAT,SEX,RACE,RINCOME,INCOME,WEALTH,REGION,
          AGE,MARITAL,CHILDS,EDUC,DEGREE,
-         PARTYID,PRES16,NATEDUC,COURTS,TAX,NATFARE) 
+         PARTYID,PRES16,NATEDUC,COURTS,TAX,NATFARE,
+         PARTTEAM) 
 
 stargazer(mygss,type="text", 
           digits = 0, 
@@ -100,33 +101,30 @@ for some variables a '9' indicates Don't Know and sometimes '0' indicates IAP (i
 for each variable that you need to recode
 - Value labels for most of the variables are in the following r chunk
 
+``` {r include =FALSE}
+val_lab(mygss$WRKSTAT)
+val_lab(mygss$SEX)
+val_lab(mygss$RACE)
+val_lab(mygss$RINCOME)
+val_lab(mygss$INCOME)
+val_lab(mygss$WEALTH)
+val_lab(mygss$REGION)
 
-``` {r}
-attach(mygss)  # Again, attach the dataset so you don't have to use "mygss$..."
-               # CAUTION! You must detach() the dataset afterwards
-val_lab(WRKSTAT)
-val_lab(SEX)
-val_lab(RACE)
-val_lab(RINCOME)
-val_lab(INCOME)
-val_lab(WEALTH)
-val_lab(REGION)
+val_lab(mygss$AGE)
+val_lab(mygss$MARITAL)
+val_lab(mygss$CHILDS)
+val_lab(mygss$EDUC)
+val_lab(mygss$DEGREE)
 
-val_lab(AGE)
-val_lab(MARITAL)
-val_lab(CHILDS)
-val_lab(EDUC)
-val_lab(DEGREE)
+val_lab(mygss$PARTYID)
+val_lab(mygss$PRES16)
 
-val_lab(PARTYID)
-val_lab(PRES16)
+val_lab(mygss$NATEDUC)
+val_lab(mygss$COURTS)
+val_lab(mygss$NATFARE)
+val_lab(mygss$TAX)
 
-val_lab(NATEDUC)
-val_lab(COURTS)
-val_lab(NATFARE)
-val_lab(TAX)
-
-detach(mygss)
+val_lab(mygss$PARTTEAM)
 
 ```
 
@@ -136,7 +134,9 @@ Use the `mis_val()` command to recode categories that represent missing values i
 
 Usage:
 
-**mis_val**(*varname*,c(*list of numerical values*), with_labels = TRUE)
+**mis_val**(*varname*,c(*list of numerical values*))
+
+UPDATE: 7.11.2020 - Remove the "with_labels = TRUE" option. That can cause errors later. 
 
 ```{r}
 
@@ -146,21 +146,19 @@ mygss$INCOME  <- mis_val(mygss$INCOME,c(0,13,98,99))
 mygss$WEALTH  <- mis_val(mygss$WEALTH,c(0,98,99))
 mygss$AGE     <- mis_val(mygss$AGE,c(98,99))
 mygss$EDUC    <- mis_val(mygss$EDUC,c(97,98,99))
-mygss$RACE    <- mis_val(mygss$RACE, 0, with_labels = TRUE)
+mygss$RACE    <- mis_val(mygss$RACE, 0)
 mygss$DEGREE  <- mis_val(mygss$DEGREE, c(7,8,9))
 mygss$MARITAL <- mis_val(mygss$MARITAL, c(9))
 mygss$CHILDS  <- mis_val(mygss$CHILDS, c(9))
 mygss$WRKSTAT <- mis_val(mygss$WRKSTAT, c(0,9))
-mygss$REGION  <- mis_val(mygss$REGION, c(0),)
-# mygss$PARTYID <- mis_val(mygss$PARTYID, c(8,9), with_labels = TRUE)
-# to recreate ERROR (uncomment the above command and comment out the command below)
+mygss$REGION  <- mis_val(mygss$REGION, 0)
 mygss$PARTYID <- mis_val(mygss$PARTYID, c(8,9)) 
-mygss$PRES16  <- mis_val(mygss$PRES16, c(0,3,4,8,9), with_labels = TRUE)
-mygss$COURTS  <- mis_val(mygss$COURTS, c(0,8,9), with_labels = TRUE)
-mygss$NATEDUC <- mis_val(mygss$NATEDUC, c(0,8,9), with_labels = TRUE)
-mygss$NATFARE <- mis_val(mygss$NATFARE, c(0,8,9), with_labels = TRUE)
-mygss$TAX     <- mis_val(mygss$TAX, c(0,8,9,4), with_labels = TRUE)
-
+mygss$PRES16  <- mis_val(mygss$PRES16, c(0,3,4,8,9))
+mygss$COURTS  <- mis_val(mygss$COURTS, c(0,8,9))
+mygss$NATEDUC <- mis_val(mygss$NATEDUC, c(0,8,9))
+mygss$NATFARE <- mis_val(mygss$NATFARE, c(0,8,9))
+mygss$TAX     <- mis_val(mygss$TAX, c(0,8,9,4))
+mygss$PARTTEAM   <- mis_val(mygss$PARTTEAM, c(0,8,9))
 
 ```
 
@@ -184,6 +182,8 @@ datasetname <- datasetname %>%
 
 The following code chunk creates new variables *party*, *region*, *labor force status*, and *agegrp* by collapsing the values of PARTYID, REGION, WRKSTAT, and AGE into a smaller number of categories, using the category cutoffs in the GSS Trend Graphs.
 
+UPDATE: 7.11.2020 - use labels for the recoded values, rather than numbers
+
 ``` {r}
 
 # The GSS variable PARTYID was recoded 
@@ -200,25 +200,28 @@ The following code chunk creates new variables *party*, *region*, *labor force s
 # This is in alignment with the Bureau of Labor Statistic's labor force definitions.
 
 mygss <- mygss %>%
-  mutate(party = case_when(PARTYID == 5 | PARTYID == 6 ~ 1,      
-                           PARTYID == 0 | PARTYID == 1 ~ 2,      
-                           PARTYID >= 2 & PARTYID <= 4 ~ 3,      
-                           PARTYID == 7 ~ 3),
+  mutate(party = case_when(PARTYID == 5 | PARTYID == 6 ~ "Republican",      
+                           PARTYID == 0 | PARTYID == 1 ~ "Democrat",      
+                           PARTYID >= 2 & PARTYID <= 4 ~ "Independent",      
+                           PARTYID == 7 ~ "Independent"),
          
-         region = case_when(REGION == 1 | REGION == 2 ~ 1,     
-                              REGION == 3 | REGION == 4 ~ 2,    
-                              REGION == 5 | REGION == 6 | REGION == 7 ~ 3, 
-                              REGION == 8 | REGION == 9 ~ 4),    
+         region = case_when(REGION == 1 | REGION == 2 ~ "NE",     
+                              REGION == 3 | REGION == 4 ~ "Midwest",    
+                              REGION == 5 | REGION == 6 | REGION == 7 ~ "South", 
+                              REGION == 8 | REGION == 9 ~ "West"),    
          
          # LFS = Labor Force Status
-         lfs    = case_when(WRKSTAT <= 3 ~ 1,                    
-                            WRKSTAT == 4 ~ 2,                    
-                            WRKSTAT > 4 & WRKSTAT < 9 ~ 3),      
+         lfs    = case_when(WRKSTAT <= 3 ~ "Employed",                    
+                            WRKSTAT == 4 ~ "Unemployed",                    
+                            WRKSTAT > 4 & WRKSTAT < 9 ~ "OLF"),      
 
-         agegrp = case_when(AGE >= 18 & AGE <= 34 ~ 1,
-                            AGE >= 35 & AGE <= 49 ~ 2 ,
-                            AGE >= 50 & AGE <= 64 ~ 3,
-                            AGE >= 65 ~ 4)
+         agegrp = case_when(AGE >= 18 & AGE <= 34 ~ "Age 18-34",
+                            AGE >= 35 & AGE <= 49 ~ "Age 35-49" ,
+                            AGE >= 50 & AGE <= 64 ~ "Age 50-64",
+                            AGE >= 65 ~ "Age 65+"),
+         
+         teamwork = case_when(PARTTEAM == 1 ~ "Team Job",
+                              PARTTEAM == 2 ~ "Solo Job")
   )
 ```
 
@@ -237,73 +240,57 @@ The following code chunk creates the *married* and *haschild* dummy variables us
 
 ``` {r}
 mygss <- mygss %>%
-  mutate(married  = if_else(MARITAL == 1, 1, 0),
-         haschild = if_else(CHILDS > 0, 1, 0)
+  mutate(married  = if_else(MARITAL == 1, "Married", "Not Married"),
+         haschild = if_else(CHILDS > 0, "Has Child", "No Children")
   )
 
 
 ```
 
-## Label variables and values
-Variable labels are important! Variable labels give variables a name. This makes tables and results "human readable". 
+## Create tables to check accuracy of the recodes
 
-Value
-labels give names to categories. This provides documentation as well.
+
+UPDATE: 7.11.2020 - use `drop_rc()` in front of all `cro()` and related table commands to prevent the display of empty rows or columns
+
+```{r}
+drop_rc(cro(mygss$PARTYID,mygss$party))
+drop_rc(cro(mygss$REGION,mygss$region))
+drop_rc(cro(mygss$WRKSTAT,mygss$lfs))
+```
+
+
+## Label variables
+Variable labels are important for making tables and results "human readable". 
 
 Use `apply_labels()` to:
 
 - Name or rename variables
-- Apply names to values (categories) of a variable
 
 Usage:
 
-datasetname <- **apply_labels**(datasetname,*var1* = "var label 1",*var1* = c("*label 1*" = *value 1*, ...))
+datasetname <- **apply_labels**(datasetname,*var1* = "var label 1")
 
-See below to see how the `apply_labels()` command is used to label
-the new variables created in the last r code chun.
+- See below to see how the `apply_labels()` command is used to label
+the new variables created in the last r code chunk.
+
+UPDATE: 7.11.2020 - do not use apply_labels() for value labels. See note above - 
+use the value labels instead of a number in the `mutate(case_when())` recode command.
+
+UPDATE: 7.11.2020 - the as_factor() command is no longer needed and is removed 
 
 ``` {r}
-# Label the new variables and their values
 mygss <-  apply_labels(mygss,
     party  = "Political Party",
-    party  =  c("Republican" = 1, "Democrat" = 2, "Independent" = 3),
-    region = "Census Region",
-    region =  c("NE" = 1, "Midwest" = 2, "South" = 3, "West" = 4),
+    region = "Region",
     lfs    = "Labor Force Status",
-    lfs    =  c("Employed" = 1, "Unemployed" = 2, "Not in LF" = 3),
     agegrp     = "Age",
-    agegrp     =  c("18-34" = 1, "35-49" = 2, "50-64" = 3, "> 64" = 4),
-    married    = "Married",
-    married    =  c("Married" = 1, "Not Married" = 0),
-    haschild   = "Children",
-    haschild   =  c("Has Child" = 1, "No Child" = 0)
+    married    = "Marital status",
+    haschild   = "Children status",
+    teamwork   = "Job type"
   )
-
-# Check the recodes
-cro(mygss$PARTYID,mygss$party)
-cro(mygss$REGION,mygss$region)
-cro(mygss$WRKSTAT,mygss$lfs)
-
 ```
 
 
-## Factor variables
-
-Factors are an important type of variable in R. They are treated as categories. Use `as_factor()` to tell R that variables should be treated as factors (categories). 
-There are a few different ways to apply as_factor to a variable. An easy way
-when there are a lot of variables, is to use the `modify_at()` command.
-
-Usage:
-
-`modify_at(c(list of varnames in double quotes), as_factor)`
-
-``` {r}
-mygss <- mygss %>%
-    modify_at(c("WRKSTAT","SEX","RACE","REGION","MARITAL","DEGREE",
-         "PARTYID","PRES16","NATEDUC","COURTS","TAX","NATFARE",
-         "party","region","lfs","agegrp","married","haschild"), as_factor)
-
-```
 
 # Get set!
 
@@ -320,22 +307,23 @@ Use the following `cro()` commands to look at the frequencies of the variables.
 
 ``` {r}
 
-cro_cpct(mygss$COURTS)
-cro_cpct(mygss$NATEDUC)
-cro_cpct(mygss$NATFARE)
-cro_cpct(mygss$TAX)
+drop_rc(cro_cpct(mygss$COURTS))
+drop_rc(cro_cpct(mygss$NATEDUC))
+drop_rc(cro_cpct(mygss$NATFARE))
+drop_rc(cro_cpct(mygss$TAX))
+drop_rc(cro_cpct(mygss$teamwork))
 
 ```
 
 
 ## Demographic Variables
 ``` {r}
-cro(mygss$SEX)
-cro_cpct(mygss$RACE)
-cro_cpct(mygss$agegrp)
-cro_cpct(mygss$region)
-cro_cpct(mygss$married)
-cro_cpct(mygss$haschild)
+drop_rc(cro(mygss$SEX))
+drop_rc(cro_cpct(mygss$RACE))
+drop_rc(cro_cpct(mygss$agegrp))
+drop_rc(cro_cpct(mygss$region))
+drop_rc(cro_cpct(mygss$married))
+drop_rc(cro_cpct(mygss$haschild))
 
 ```
 
@@ -346,13 +334,13 @@ stargazer(mygss,type="text",
           digits = 0, 
           summary.stat = c("n","min","max","median","mean","sd"))
 
-cro_cpct(mygss$DEGREE)
-cro_cpct(mygss$lfs)
-cro_cpct(mygss$RINCOME)
-cro_cpct(mygss$INCOME)
-cro_cpct(mygss$WEALTH)
-cro_cpct(mygss$party)
-cro_cpct(mygss$PRES16)
+drop_rc(cro_cpct(mygss$DEGREE))
+drop_rc(cro_cpct(mygss$lfs))
+drop_rc(cro_cpct(mygss$RINCOME))
+drop_rc(cro_cpct(mygss$INCOME))
+drop_rc(cro_cpct(mygss$WEALTH))
+drop_rc(cro_cpct(mygss$party))
+drop_rc(cro_cpct(mygss$PRES16))
 
 ```
 
@@ -385,7 +373,7 @@ How to read the table:
 ## Voting example
 ``` {r}
 
-cro_cpct(mygss$party,mygss$PRES16) %>% 
+drop_rc(cro_cpct(mygss$party,mygss$PRES16)) %>% 
   significance_cpct()
 
 ```
@@ -399,7 +387,7 @@ Suppose you want to see if
 beliefs about *COURTS* appear to be related to the *region* of the
 respondent
 ``` {r}
-cro_cpct(mygss$COURTS,mygss$region) %>% 
+drop_rc(cro_cpct(mygss$COURTS,mygss$region)) %>% 
   significance_cpct()
 
 ```
@@ -422,7 +410,7 @@ Usage:
 - cro(*row variable*, *top level* %nest% *bottom level* )
 
 ``` {r}
-cro_cpct(mygss$COURTS, mygss$RACE %nest%  mygss$region) %>%   
+drop_rc(cro_cpct(mygss$COURTS, mygss$RACE %nest%  mygss$region)) %>%   
   significance_cpct()
 
 ```
@@ -451,5 +439,13 @@ GSS by adding their name to the "select()" statement when reading in the dataset
 ```
 
 
+# Save the final version of your mygss file so you can use it in your report.
 
+UPDATE: 7.11.2020 - Save the file you created during the exploratory
+analysis and then read it in at the start of your final empirical project report.
+
+```{r}
+save(mygss,file="mygss.RData")
+
+```
 
