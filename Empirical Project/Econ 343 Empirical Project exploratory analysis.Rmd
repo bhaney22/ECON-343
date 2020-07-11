@@ -272,11 +272,17 @@ datasetname <- **apply_labels**(datasetname,*var1* = "var label 1")
 
 - See below to see how the `apply_labels()` command is used to label
 the new variables created in the last r code chunk.
+<<<<<<< HEAD
 
 UPDATE: 7.11.2020 - do not use apply_labels() for value labels. See note above - 
 use the value labels instead of a number in the `mutate(case_when())` recode command.
 
 UPDATE: 7.11.2020 - the as_factor() command is no longer needed and is removed 
+=======
+
+UPDATE: 7.11.2020 - do not use apply_labels() for value labels. See note above - 
+use the value labels instead of a number in the `mutate(case_when())` recode command.
+>>>>>>> 2e3085885d951aa343891263e08e7d9c13161f19
 
 ``` {r}
 mygss <-  apply_labels(mygss,
