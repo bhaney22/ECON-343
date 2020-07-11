@@ -1,17 +1,18 @@
 ---
 title: "Econ 343 Empirical Project lastname, firstname"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     number_sections: yes
     toc: yes
     toc_collapsed: yes
     toc_float: yes
     toc_levels: 2
+  pdf_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
+
 #
 # Always include these packages in R projects for this class
 #
@@ -39,8 +40,13 @@ library(plm)        # lm commands for panel data
 
 options(digits=4)   # limits number of decimals to 4 when printing
 
-knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
+options(knitr.duplicate.label = 'allow')
+
 ```
+
+UPDATE: 7.11.2020 - revised to use example from GSS data
+UPDATE: 7.11.2020 - revised to read in saved file from ECON 343 Exploratary Analysis.Rmd
 
 # Project Summary
 
@@ -48,13 +54,13 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 
 *1. Economic Question*
 
-**economic question**
+**What type of workers tend to work more often in teams?**
 
 - Explain briefly why this question is interesting using infographic, statistics, and opinion articles. 
 
 *2. Economic Model*
 
-**$$\textbf{dependent variable} = f(\textbf{list of explanatory variables})$$**
+**$$\textbf{teamwork} = f(\textbf{education,age,sex,region,college grad})$$**
 
 - Use the research paper you found to help explain the list of explanatory variables.
 
@@ -66,7 +72,7 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 
 *4. Data*
 
- **summary table of basic descriptive statistics** for each variable
+ **summary tables and crosstabs** for each variable
  
 - Define each of the variables.
 
@@ -124,251 +130,279 @@ sampled (the "sampling frame").
 
 - Explain how these variables are operationalized in the dataset.
 
-
-``` {r}
-
-# Dataset for illustrative examples used in the template
-
-mydata <- mtcars # for this template I use the mtcars data to illustration
-
-# 2. Select the variables you need, and optionally, a subset of the observations.
-
-# For example, restrict analysis to only 6 cylinder cars and drop that variable
-# mydata <- mtcars %>% 
-#  filter(cyl==6) %>%  
-#  select(-cyl)
-
-# 3. Provide meaningful names for variables. Give meaningful labels to values of
-#    categorical variables. R will treat them as factors automatically.
-
-mydata <- apply_labels(mydata,
-#Label quantiative Variables:
-                      mpg = "Miles/gallon",
-                      disp = "Displacement (cu.in.)",
-                      hp = "Gross horsepower",
-                      drat = "Rear axle ratio",
-                      wt = "Weight (1000 lbs)",
-                      qsec = "1/4 mile time",
-                      gear = "Number of forward gears",
-                      carb = "Number of carburetors",
-
-# Categorical Variables:                      
-                      cyl = "Number of cylinders",
-                      cyl = c("4 cyl" = 4,
-                              "6 cyl" = 6,
-                              "8 cyl" = 8),
-                      vs = "Engine",
-                      vs = c("V-engine" = 0,
-                             "Straight engine" = 1),
-                      am = "Transmission",
-                      am = c("Automatic" = 0,
-                             "Manual"=1)
-)
-
-# 4. It is common that a dataset will have "row names" that identify observations. 
-# You can check this with the command "rownames(mydata)". 
-# If so, you should add the rownames as an additional column in the dataset using
-# the following command.
-
-mydata <- rownames_to_column(mydata,var="Name of Car")
-
-
-# 5. Create new variables as needed.
-#    For example, create a new categorical variable based on values of a continuous variable
-mydata$heavy <- NULL
-mydata$heavy[mydata$wt <  mean(mydata$wt)] = 0
-mydata$heavy[mydata$wt >= mean(mydata$wt)] = 1
-
-# Give the values of the new categorical variable meaningful labels
-mydata$heavy <- factor(mydata$heavy,
-  levels = c(0,1),
-  labels = c("Below Avg","Above Avg"))
-
-```
-
-* Explicitly document and explain all of the steps you took to get the data into 
-usable form for analysis. 
-
-* The package ***dplyr*** has most of the commands you need for data wrangling and summarizing
-click here for the dplyr cheatsheet 
-[https://github.com/rstudio/cheatsheets/blob/master/data-transformation.pdf]
-  + Select & Filter commands
-  + Add labels for variables 
-  + Create categorical variables (factors)
-  + Define names for each of the values in the factor (factor levels)
-  + Create dummy variables
-  + Create other variables
-  + etc.
-  
-  
-## Compare Means across one category
+- Make sure to run your **Empirical Project exploratory analysis.Rmd** file to create 
+and save your ***mygss*** dataset before loading it below.
 
 ```{r}
 
-# summary statistics
-# commands from expss package
+# Display the basic variables you are using for your analysis 
+load("~/ECON 343/Empirical Project/mygss.RData")
+mydata <- mygss
+stargazer(mydata,type = "text")
+as_tibble(mydata)
+```
+
+# Preliminary Analysis
+
+What are the key relationships you want to explore? Look at simple comparisons and correlations first.
+
+**What types of workers tend to work in teams more than independently?**
+
+```{r}
+## Use this command as a template to produce cross-tabs for Qualitative variables
 
 mydata %>%
-  tab_cells(mpg, disp, hp, wt, qsec) %>%   # cells -> continuous variables
-  tab_cols(am) %>%                         # columns -> categories 
+  calc_cro_cpct_responses(list(teamwork),              # list a qualitative dependent variable
+                          list(SEX,total())) %>%     # list a qualitative explanatory variable
+  significance_cpct()   # test for significant differences
+
+mydata %>%
+  calc_cro_cpct_responses(list(teamwork),              # list a qualitative dependent variable
+                          list(agegrp,total())) %>%     # list a qualitative explanatory variable
+  significance_cpct() 
+```
+
+**Discuss** There are statistically significant differences by age (workers over age 65 are 
+less likely to be in team-work oriented jobs), but no differences between men and women.
+
+
+**Economic Question: Does statistical significance patterns change when controlling for agegrp or gender?**
+```{r}
+mydata %>%
+  calc_cro_cpct_responses(list(teamwork),   # qualitative dependent variable
+                          list(agegrp %nest% SEX,total())) %>%     # add a control variable
+  significance_cpct()  
+
+mydata %>%
+  calc_cro_cpct_responses(list(teamwork),   # qualitative dependent variable
+                          list(SEX %nest% agegrp,total())) %>%     # add a control variable
+  significance_cpct()  
+
+```
+
+**Discuss** The difference between men and women is still not statistically signficant
+when controlling for age. Age is still stat. sig. even after controlling for male vs. female.
+  
+**Economic question: What other attributes of a worker appear to be associated with having a teamwork-oriented job?**
+
+```{r}
+# Use this command as a template to compare Means of Quantitative variables by categories
+mydata %>%
+  tab_cols(teamwork) %>%                        # columns represent categories to compare
+  tab_cells(INCOME,WEALTH,AGE,EDUC) %>%            # cells are the continuous variables
   tab_stat_mean_sd_n() %>%
-  tab_last_sig_means() %>%                 # test for significant differences 
+  tab_last_sig_means() %>%                    # test for significant differences 
   tab_pivot()
 ```
 
+**Discussion** Age appears to be the only relevant variable. However, the statistical
+significance of the other variables might show up if age is controlled for. Let's see:
 
-## Compare Means across nested categories
 
 ```{r}
 mydata %>%
-  tab_cells(mpg, disp, hp, wt, qsec) %>%              
-  tab_cols(vs %nest% am)    %>%            # "nested" columns -> categories within categories
-  tab_stat_mean_sd_n() %>%
-  tab_last_sig_means() %>%
+  tab_cols(agegrp %nest% teamwork)     %>%            # "nested" columns are categories within categories
+  tab_cells(INCOME,WEALTH,AGE,EDUC)    %>%            # cells are the continuous variables            
+  tab_stat_mean_sd_n()            %>%
+  tab_last_sig_means()            %>%
   tab_pivot()
 
 ```
 
+**Discussion** Higher levels of education do seem to counteract the age effect, a little. 
+The only group that is statistically significantly less likely to have a teamwork-oriented
+job are workers over age 65. However, within that group, more highly educated workers
+are more likely to have a teamwork-oriented job than less-educated over 65 year olds.
 
-## Cross-tabs
-Do the means remain statistically significantly different if we control for engine type?
+Now it is time to use regression analysis to control for several attributes at once and
+estimate the marginal effects of each of these factors on having a teamwork-oriented job.
 
-```{r}
-mydata %>%
-  calc_cro_cpct_responses(list(vs),              # first list are categories for the rows
-                          list(am,total())) %>%  # second list are categories for columns
-  significance_cpct()                            # test for significant differences
-```
+# Regression Analysis
 
-## Correlations
+## Dummy variables
 
-```{r}
+  - For regressions, collapse multiple categories down to two (0/1)
+  - use the `val_lab()` command to find out what you want to recode
+  - Use `as.numeric()` with variables that have labels as their values
 
-# Provide a "heatmap" of correlations to examine how variables are correlated with
-# the dependent variable and with each other, without controlling for anything else.
-
-cor1 <- mydata %>% 
-  select(mpg,hp,disp,qsec,wt)
-  plot_correlation(cor1, title="Correlations of car characteristics")
-
-```
-
-Examine relationships between categorical
-variables is to create tables that show how the distribution across categorical 
-variables and compare means across groups. 
-
-For example, suppose the economic question is to examine if manual 
-transmissions are still significantly more gas efficient than automatic transmissions, after controlling for other characteristics.
-
-``` {r}
-gf_point(mpg ~ wt, data = mydata) %>%
-  gf_lm()
-
-```
-
-# Analysis
-
-
-## Initial Model Results
 
 ```{r}
 
-lm1 <- lm(mpg ~ am + disp + hp + wt,mydata)
+# Here is an example for how to collapse multi-categorical dependent variables
+# into a dummy variable to run a Linear Probability Model
+
+val_lab(mydata$COURTS)
+val_lab(mydata$DEGREE)
+val_lab(mydata$region)
+
+mydata <- mydata %>%
+  mutate(not_harsh_enough = case_when(COURTS == 1 | COURTS == 3 ~ 0,
+                                      COURTS == 2  ~ 1),
+         collgrad = case_when(DEGREE == 3 | DEGREE == 4 ~ 1,
+                                DEGREE == 1 | 
+                                DEGREE == 2 | 
+                                DEGREE == 3 ~ 0),
+         south = case_when(region == 3 ~ 1,
+                             region == 1 | 
+                             region == 2 | 
+                             region == 4 ~ 0),
+         female = case_when(SEX == 2 ~ 1,
+                            SEX == 1 ~ 0))
+
+cro(mydata$DEGREE,mydata$collgrad)
+cro(mydata$SEX,mydata$female)
+
+
+
+
+
+```
+
+## Missings
+
+When dealing with real data (outside of homework-land), 
+missing value patterns can cause problems. 
+
+- Regressions only use observations that
+have no missings in any of the variables in the regression. 
+
+- Post-regression commands, such as fitted(), want to use the
+entire dataset, includig observations that are not in the regression.
+
+- So, always 
+create a fresh dataset for your regression that includes only observations with no missing values for the variables
+in your model. 
+
+- See the `na.omit() with the select()` command below to create `lm.mydata` that contains only observations with no missing values for the variables used in regressions 
+
+- Use `lm.mydata` for all regressions to ensure that the the results are based on the same sample 
+
+- Use `lm.mydata` for post-regression analysis to ensure you are using the same dataset consistently
+
+
+```{r}
+lm.mydata <- mydata %>% select(teamwork,EDUC,female,AGE,agegrp,collgrad,INCOME,region)
+lm.mydata <- na.omit(lm.mydata)
+
+stargazer(lm.mydata,type = "text")
+# as_tibble(lm.mydata)
+```
+
+
+## Regression Results
+```{r}
+lm1 <- lm(teamwork ~ EDUC + AGE + female + collgrad, data = lm.mydata)
+
 stargazer(lm1,type="text")
 
 ```
 
-- Present initial model. Either replicate the key regresssion results from the research, 
-or create your own "initial"
-regression results from data. 
 
-- Explain in your
-own words what the estimated coefficients mean, and the conclusion about
-the economic question
-that can be drawn from the regression.
+## Check Predicted probabilities
+
+Remember to use the lm.mydata data in all regressions, and post-regression commands
+```{r}
+# Get the "y-hats"
+# Recode y-hats to be dummy y_hat (take on 0/1 values only)
+
+lm1.data <- lm.mydata %>%
+  mutate(yhat  = fitted(lm1),
+         yhat_dummy = case_when(yhat >= .5 ~ 1,
+                                yhat  < .5 ~ 0))
+
+range_yhat <- range(lm1.data$yhat)
+gt1_yhat   <- count(lm1.data$yhat > 1)
+
+cro_cpct(lm1.data$teamwork, lm1.data$yhat_dummy)
+
+```
+
+**Write-up** The fitted probabilities range from `r range_yhat[1]` to `r range_yhat[2]`, so none are negative.  
+There are `r gt1_yhat` predicted probabilities above 1..
 
 
-## New Model Results
+# Evaluate the LPM model 
+
+**How well does this model predict beliefs about court sentencing?**
+
+Compare actual to predicted probabilities.
 
 ```{r}
-lm2 <-lm(mpg ~ am + disp + hp + wt + am*wt,mydata)
+# create a variable that determines if the predicted y_hat was correct or not
+lm1.data <- lm1.data %>%
+  mutate(correct_pred = case_when(yhat_dummy == teamwork ~ 1,
+                                  yhat_dummy != teamwork ~ 0))
+
+# overall correct prediction rate
+Pct_correct_pred <- mean(lm1.data$correct_pred)
+
+# percent of ecobuyers correctly predicted
+Pct_correct_teamworker <- mean(lm1.data$correct_pred[lm1.data$teamwork == 1]) * 100
+
+# percent of non-ecobuyers correctly predicted
+Pct_correct_soloworker <- mean(lm1.data$correct_pred[lm1.data$teamwork == 0]) * 100
+                            
+```
+
+**Write-up** This model does a decent job at predicting beliefs about court sentencing. But, much better for predicting those who believe sentences should be harsher than those who don't.
+
+Using the standard prediction rule – $\hat{y}_{dummy}$ = 1 if $\hat{y}$ > or = .5 and zero otherwise:
+
+- The overall percent correctly predicted is **`r Pct_correct_pred`%.**
+
+- The percent correctly predicted for team workers is
+**`r Pct_correct_teamworker`%**.   
+
+- The fraction correctly predicted for solo workers is 
+only **`r Pct_correct_soloworker`**%.  
+
+# Sensitivity Analysis
+
+- Try running your model on a sub-group or re-code a variable differently to see if you still get 
+qualitatively similary results
+
+- Compare and contrast the results of the two approaches. Are your results "robust" to an alternative model?
+
+For this example, let's see if the regression is different if we run exclude workers living in the West (silicon valley).
+
+```{r}
+cro(lm.mydata$region)
+
+lm2 <- lm(teamwork ~ EDUC + AGE + female + collgrad, 
+          data = lm.mydata %>% 
+            filter(region != "West"))
+
 stargazer(lm1,lm2,type="text")
 
 ```
 
+**Discuss** Removing the workers in the "West" did not change the results by much at all.
 
-- Modify the model in some way by operationalizing an explanatory variable in a different
-way, adding new explanatory variables, or using a different regression method.
+# Linear Hypothesis Test
 
-- Fully explain the different data and methods that you use. 
+- Test something from your main model or use an F-test to compare the two models you ran for sensitivity analysis.
 
-- Run the new analysis.
+Example: Neigher education or the dummy variable for college graduate are statistically
+significant in the models. But, might they be jointly statistically significant?
 
-- Compare and contrast the results of the two models.
-
-## Check Assumptions
-
-- Check for normality and heteroscedasticity so that post-regression inference is valid.
-
-### Normally Distributed?
 ```{r}
-
-qqPlot(lm1)
-qqPlot(lm2)
+h1 <- linearHypothesis(lm1,c("EDUC=0","collgrad=0"))
+h2 <- linearHypothesis(lm2,c("EDUC=0","collgrad=0"))
+h1
+h2
 
 ```
 
-
-### Heteroscedasticity?
-
-```{r}
-
-bptest(lm1)
-bptest(lm2)
-
-```
-
-- Use the Brausch-Pagan Test to
-test for the presence of heteroscedasticity in your new model.
-
-- Discuss the results.
-
-
-## Post-Regression Analysis
-
-### Graphs of Marginal Effects
-
-```{r}
-plot(effect("am",lm1))
-plot(effect("am",lm2))
-```
-
-### Linear Hypothesis Tests
-
-```{r}
-
-lht(lm1,c("disp=hp"))
-lht(lm1,c("disp=hp"),white.adjust = TRUE)
-lht(lm2,c("disp=hp"))
-lht(lm2,c("disp=hp"),white.adjust = TRUE)
-
-```
-
-- Compare the effect of the primary explanatory variable on the dependent variable between the 
-two models. 
-
-- Run at least one post-regression linear hypothesis test.
-
-- Perform tests with and without correcting for heteroscedasticity. And discuss any
-differences you find.
+**Discuss** Education and college-degree are neither individually nor jointly statistically signficant. There is not enough evidence to suggest that education is related to
+whether a person works in a team or solo on their job.
 
 # Conclusion
 
 - In this last section:
   + Restate the economic question
-  + Explain how the primary empirical paper contributed to understanding that
+  + Explain how the primary research paper contributed to understanding that
   question.
-  + Describe how you extended their results and what you learned
+  + Describe what you learned from the process
   + Conclude with suggestions of additional questions that would be
   interesting to pursue based on what you found.
   

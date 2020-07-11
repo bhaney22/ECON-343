@@ -183,6 +183,7 @@ datasetname <- datasetname %>%
 The following code chunk creates new variables *party*, *region*, *labor force status*, and *agegrp* by collapsing the values of PARTYID, REGION, WRKSTAT, and AGE into a smaller number of categories, using the category cutoffs in the GSS Trend Graphs.
 
 UPDATE: 7.11.2020 - use labels for the recoded values, rather than numbers
+UPDATE: 7.11.2020 - use 0/1 (not characters) when creating dummy variables
 
 ``` {r}
 
@@ -218,11 +219,13 @@ mygss <- mygss %>%
          agegrp = case_when(AGE >= 18 & AGE <= 34 ~ "Age 18-34",
                             AGE >= 35 & AGE <= 49 ~ "Age 35-49" ,
                             AGE >= 50 & AGE <= 64 ~ "Age 50-64",
-                            AGE >= 65 ~ "Age 65+"),
-         
-         teamwork = case_when(PARTTEAM == 1 ~ "Team Job",
-                              PARTTEAM == 2 ~ "Solo Job")
+                            AGE >= 65 ~ "Age 65+")
   )
+
+# Check accuracy of recodes
+cro(mygss$PARTYID,mygss$party)
+cro(mygss$REGION,mygss$region)
+cro(mygss$WRKSTAT,mygss$lfs)
 ```
 
 **Dummy variables**
@@ -230,32 +233,23 @@ mygss <- mygss %>%
 Dummy variables are "0/1" variables, with value = 1 if the variable is true
 and value = 0 if the variable is false
 
-- Use `mutate()` with `if_else()` to create a dummy variable 
-
-Usage:
-
-**mutate**(*varname* = **if_else**(*condition that is true*,1,0))
-
-The following code chunk creates the *married* and *haschild* dummy variables using `if_else()`.
+- give dummy variables values of 0/1 rather than categorical names.
 
 ``` {r}
-mygss <- mygss %>%
-  mutate(married  = if_else(MARITAL == 1, "Married", "Not Married"),
-         haschild = if_else(CHILDS > 0, "Has Child", "No Children")
+
+                              
+mygss <- mygss %>%         
+         mutate(teamwork = case_when(PARTTEAM == 1 ~ 1,
+                              PARTTEAM == 2 ~ 0),
+          married  = case_when(MARITAL == 1 ~ 1,
+                              MARITAL  > 1 ~ 0),
+          haschild = case_when(CHILDS   > 0 ~ 1, 
+                               CHILDS == 0 ~ 0)
   )
 
-
-```
-
-## Create tables to check accuracy of the recodes
-
-
-UPDATE: 7.11.2020 - use `drop_rc()` in front of all `cro()` and related table commands to prevent the display of empty rows or columns
-
-```{r}
-drop_rc(cro(mygss$PARTYID,mygss$party))
-drop_rc(cro(mygss$REGION,mygss$region))
-drop_rc(cro(mygss$WRKSTAT,mygss$lfs))
+cro(mygss$PARTTEAM,mygss$teamwork)
+cro(mygss$MARITAL,mygss$married)
+cro(mygss$CHILDS,mygss$haschild)
 ```
 
 
@@ -268,21 +262,14 @@ Use `apply_labels()` to:
 
 Usage:
 
-datasetname <- **apply_labels**(datasetname,*var1* = "var label 1")
+- datasetname <- **apply_labels**(datasetname,*var1* = "var label 1")
 
-- See below to see how the `apply_labels()` command is used to label
-the new variables created in the last r code chunk.
-<<<<<<< HEAD
 
 UPDATE: 7.11.2020 - do not use apply_labels() for value labels. See note above - 
 use the value labels instead of a number in the `mutate(case_when())` recode command.
 
 UPDATE: 7.11.2020 - the as_factor() command is no longer needed and is removed 
-=======
 
-UPDATE: 7.11.2020 - do not use apply_labels() for value labels. See note above - 
-use the value labels instead of a number in the `mutate(case_when())` recode command.
->>>>>>> 2e3085885d951aa343891263e08e7d9c13161f19
 
 ``` {r}
 mygss <-  apply_labels(mygss,
@@ -290,9 +277,9 @@ mygss <-  apply_labels(mygss,
     region = "Region",
     lfs    = "Labor Force Status",
     agegrp     = "Age",
-    married    = "Marital status",
-    haschild   = "Children status",
-    teamwork   = "Job type"
+    married    = "Married",
+    haschild   = "Has Children",
+    teamwork   = "Works in team"
   )
 ```
 
@@ -306,8 +293,12 @@ Use the following `cro()` commands to look at the frequencies of the variables.
 
 - `cro()` with one variable displays the for each level of a factor variable
 - `cro_cpct()` reports percentage responses for each level of a factor variable
--  `cro_cpct(var1,var2)` with two variables. The second variable is the explanatory variable
+- `cro_cpct(var1,var2)` with two variables. The second variable is the explanatory variable
 - use `cro_cpct()` with `%nest%` for more than one explanatory variable (see below)
+
+UPDATE: 7.11.2020 
+
+- use `drop_rc()` in front of all `cro()` and related table commands to prevent the display of empty rows or columns
 
 ## Dependent Variables
 
