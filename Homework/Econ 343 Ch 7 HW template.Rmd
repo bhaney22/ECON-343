@@ -108,7 +108,7 @@ stargazer(lm7.4v,type = "text")
 
 ```
 
-**3. What is the hypothesis and results of that hupothesis that the coefficient on *femsat* tests?**
+**3. What is the hypothesis and results of that hypothesis that the coefficient on *femsat* tests?**
 
 
 
