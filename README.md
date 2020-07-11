@@ -44,3 +44,8 @@ Ch 6 R Lecture.Rmd
 - data.frame()     to create xvariable values for input into predict()
 - predict()
 - predict( ,interval = "confidence" or "predict")
+
+Ch 7 R Lecture.Rmd
+
+- using mutate(case_when) to create dummy variables
+- commands to evaluate dummy variable regressions (linear probability models)
