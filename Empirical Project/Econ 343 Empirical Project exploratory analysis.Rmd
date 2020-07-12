@@ -23,8 +23,8 @@ library(DataExplorer) # nice commands to learn about a new data set
 library(stargazer)  # nice regression output
 library(ggformula)  # easy graphing interface for ggplot
 library(mosaic)     # accompanies ggformula
-library(expss)      # apply_labels() cro()
 library(haven)      # reading in .dta and .sav data (other stats packages)
+library(expss)      # apply_labels() cro()
 
 library(AER)        # data and commands specific to econometrics
 library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
