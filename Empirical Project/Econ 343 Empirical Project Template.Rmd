@@ -323,7 +323,7 @@ There are `r gt1_yhat` predicted probabilities above 1..
 
 # Evaluate the LPM model 
 
-**How well does this model predict beliefs about court sentencing?**
+**How well does this model predict team-oriented job?**
 
 Compare actual to predicted probabilities.
 
