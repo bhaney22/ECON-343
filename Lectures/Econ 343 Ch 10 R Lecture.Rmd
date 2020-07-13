@@ -1,0 +1,120 @@
+---
+title: "Econ 343 Ch 10 R Lecture"
+output:
+  html_document:
+    number_sections: no
+    toc: yes
+    toc_collapsed: yes
+    toc_float: yes
+    toc_levels: 3
+  beamer_presentation: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+# R commands for Time series
+
+- Define Yearly time series beginning in yyyy
+  - tsdata <- ts(dsname, start=yyyy)
+  
+- `dynlm()` is time Series version of `lm()`
+  
+- lags in regression model:
+
+  - lm <- dynlm(y ~ x1 + L(x1) + L(x1,2) + x2, data=tsdata)
+  
+- trends in regression model
+  - trend(tsdata)
+
+
+# Example 10-4 Lags and LRP
+
+```{r}
+
+# Define Yearly time series beginning in 1913
+tsdata <- ts(fertil3, start=1913)
+
+# Linear regression of model with lags:
+lm.ex10.4 <- dynlm(gfr ~ pe + L(pe) + L(pe,2) + ww2 + pill, data=tsdata)
+stargazer(lm.ex10.4,type = "text")
+
+
+# F test. H0: all pe coefficients are=0
+linearHypothesis(lm.ex10.4, matchCoefs(lm.ex10.4,"pe"))
+
+```
+
+
+## Calculate the LRP
+
+```{r}
+b<-coef(res)
+LRP <- b["pe"]+b["L(pe)"]+b["L(pe, 2)"]
+```
+
+The long run propensity impact of the personal tax exemption is: 
+**$LRP_{pe} = `r LRP`$**.
+
+
+## F test. H0: LRP=0
+```{r}
+linearHypothesis(res,"pe + L(pe) + L(pe, 2) = 0")
+```
+
+
+
+# Example 10-7 Trends
+
+## Define Yearly time series beginning in 1947
+```{r}
+tsdata <- ts(hseinv, start=1947)
+as_tibble(tsdata)
+```
+
+
+## Linear regression with and w/o trend:
+```{r}
+lm.ex10.7 <- dynlm(log(invpc) ~ log(price)                , data=tsdata)
+lm.ex10.7t <- dynlm(log(invpc) ~ log(price) + trend(tsdata), data=tsdata)
+
+stargazer(lm.ex10.7,lm.ex10.7t, type="text")
+```
+
+
