@@ -26,6 +26,7 @@ library(DataExplorer) # nice commands to learn about a new data set
 library(stargazer)  # nice regression output
 library(ggformula)  # easy graphing interface for ggplot
 library(mosaic)     # accompanies ggformula
+library(haven)
 library(expss)      # apply_labels() cro()
 
 library(AER)        # data and commands specific to econometrics
