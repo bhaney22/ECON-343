@@ -85,7 +85,7 @@ linearHypothesis(lm.ex10.4, matchCoefs(lm.ex10.4,"pe"))
 ## Calculate the LRP
 
 ```{r}
-b<-coef(res)
+b<-coef(lm.ex10.4)
 LRP <- b["pe"]+b["L(pe)"]+b["L(pe, 2)"]
 ```
 
@@ -95,7 +95,7 @@ The long run propensity impact of the personal tax exemption is:
 
 ## F test. H0: LRP=0
 ```{r}
-linearHypothesis(res,"pe + L(pe) + L(pe, 2) = 0")
+linearHypothesis(lm.ex10.4,"pe + L(pe) + L(pe, 2) = 0")
 ```
 
 
