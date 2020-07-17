@@ -1,5 +1,5 @@
 ---
-title: "Econ 343 Ch 10 HW Key"
+title: "Econ 343 Ch 10 HW **student name**"
 output:
   html_document:
     df_print: paged
