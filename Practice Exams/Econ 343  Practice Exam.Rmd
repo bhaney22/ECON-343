@@ -1,7 +1,12 @@
 ---
-title: "Econ 343 Practice Exam"
+title: "Econ 343 Practice Exam - **ADD Lname, Fname**"
 output:
-  html_document: default
+  html_document:
+    number_sections: no
+    toc: yes
+    toc_collapsed: yes
+    toc_float: yes
+    toc_levels: 3
 ---
 
 **Instructions:** 
@@ -52,7 +57,9 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 ```
 
 
-# 1  Economic Question: What is the effect of experience on wages for urban, college-educated workers? 
+# 1  Experience and Wages
+**Economic Question: What is the effect of experience on wages for urban, college-educated workers? **
+
 (a) (10 points) Create a dataset named *mydata* that contains only 
 the college educated (educ>=16) people from the ***wage2*** dataset.(All datasets are from the wooldridge package.)
 A
@@ -115,7 +122,9 @@ as 1 more year of tenure for this group of college-educated workers. What do you
 
 
 
-# 2 Economic Question: Are married applicants more likely to be approved for a mortgage?
+# 2 Married and Loan Approval
+**Economic Question: Are married applicants more likely to be approved for a mortgage?**
+
 Use the variables in the *loanapp* dataset. Note that the dummy variable 
 *approve* = 1 if the person 
 was approved for a loan, 0 otherwise. The dummy variable *married* = 1 if the person is
@@ -183,7 +192,9 @@ of the coefficients on *married*, *haskid* and *the additional variable you incl
 **Write your answer here:                       **
 
 
-# 3 Economic Question: Does Spending increase school performance?
+# 3 Spending and School Performance
+**Economic Question: Does Spending increase school performance?**
+
 Imagine you are one of several interns working for a Michigan legislator. The legislators wants 
 to know how much school performance improves with additional per pupil spending. 
 
