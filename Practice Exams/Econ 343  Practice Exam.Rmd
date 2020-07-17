@@ -1,0 +1,274 @@
+---
+title: "Econ 343 Practice Exam"
+output:
+  html_document: default
+---
+
+**Instructions:** 
+
+- Complete each of the questions below. Use r "mini-chunks" in
+the write-ups. Make sure your write-ups are your own words and interpretations.
+
+- The prompt **Write your answer here:                       ** indicates where you should
+include your written responses. Do not put written responses elsewhere. Make sure your
+answer is in between the two sets of asterisks so that it is bold.
+
+- Display all estimated regression results using stargazer, with type="text". 
+
+- When complete, knit to HTML, open in browser, then print, 
+using "Save as PDF" option. Upload the .pdf to Moodle.
+
+
+```{r setup, include=FALSE}
+#
+# Always include these packages in R projects for this class
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+
+options(digits=4)   # limits number of decimals to 4 when printing
+
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+
+```
+
+
+# 1  Economic Question: What is the effect of experience on wages for urban, college-educated workers? 
+(a) (10 points) Create a dataset named *mydata* that contains only 
+the college educated (educ>=16) people from the ***wage2*** dataset.(All datasets are from the wooldridge package.)
+A
+graph command is provided for you that 
+compares the effect of experience on wages for urban and non-urban workers. After creating
+the dataset, run the graph command as is.
+
+
+```{r}
+# Uncomment to run the following commands once you have filled in the missing information ("???").
+
+#mydata <- ???
+
+#gf_point(wage ~ exper|urban, data=mydata) %>%
+#  gf_lm()
+
+```
+
+
+From the graph, what
+can you say about the effect of experience on wages for Urban vs. Non-Urban
+College Educated workers?
+
+**Write your answer here:                       **
+
+
+(b) (10 points) With *mydata*, estimate a **semi-log** model for *wage* on *education*,*experience*,*tenure*,
+the dummy variable *urban* (already provided for you in the dataset) and
+an **interaction term between urban and experience** (you provide). 
+
+Just run the model and display the results. Save the discussion of the results 
+for the next parts of this question.
+
+```{r}
+# Uncomment to run the following commands once you have filled in the missing information ("???").
+
+
+#Model.1 <- lm(???, data=mydata)
+
+#stargazer(Model.1, type="text")
+```
+
+(c) (10 points) Interpret and discuss the statistical significance of each of the coefficients in the model.
+
+**Write your answer here:                       **
+
+
+
+
+(d) (10 points) Test whether the effect of 1 more year of experience on log wages the same has the effect 
+as 1 more year of tenure for this group of college-educated workers. What do you find? Explain.
+
+```{r}
+ 
+```
+
+**Write your answer here:                       **
+
+
+
+
+
+# 2 Economic Question: Are married applicants more likely to be approved for a mortgage?
+Use the variables in the *loanapp* dataset. Note that the dummy variable 
+*approve* = 1 if the person 
+was approved for a loan, 0 otherwise. The dummy variable *married* = 1 if the person is
+married, and 0 otherwise. The variable *dep* contains the total number of dependents 
+that the applicant has. For simplicity, assume all dependents
+are children.
+
+(a) (10 points) Create a dummy variable called "haskid" to indicate whether the applicant has kids or
+not.
+
+```{r}
+mydata1 <- loanapp
+
+#mydata1$haskid <- ???
+# ???
+# ???
+```
+
+(b) (10 points) Estimate a linear probability model of *approve* on *married*, *appinc*, your
+new variable *haskid*, and **one additional variable of your choice**. Report the results using stargazer.
+
+
+**NOTE: To run your model, uncomment and modify the lm() command in the r-chunk below that has already
+been started for you. DO NOT DELETE the option ***na.action=na.exclude*** or
+the model results will not work with the predict() and lht() commands later on.
+ 
+
+```{r}
+# Uncomment to run the following commands once you have filled in the missing commands ("???").
+
+#lm.loana  <- lm(approve ~ married + appinc + haskid + ???,data=mydata1,na.action=na.exclude)
+
+#stargazer(lm.loana,type="text")
+
+```
+
+(c) (10 points) Explain your reasoning behind the additional variable you chose. What did you expect
+to learn by including it? Save your discussion about what you did learn for the next part.
+
+**Write your answer here:                       **
+
+
+(d) (10 points) Interpret the meaning and discuss the statistical significance 
+of the coefficients on *married*, *haskid* and *the additional variable you included*. 
+
+**Write your answer here:                       **
+
+
+(e) (10 points) Does the model result in any unreasonable estimated probabilities? Explain.
+
+```{r}
+
+
+
+```
+
+**Write your answer here:                       **
+
+(f) (10 points) What proportion of the observations are correctly predicted? What do you conclude from this? 
+
+``` {r}
+
+```
+
+**Write your answer here:                       **
+
+
+# 3 Economic Question: Does Spending increase school performance?
+Imagine you are one of several interns working for a Michigan legislator. The legislators wants 
+to know how much school performance improves with additional per pupil spending. 
+
+Another intern drafted a report that concluded there was no relationship on
+spending and academic performance. The report included regression results to support that conclusion, 
+using the 2001 MEAP data on 4th grade math scores and per pupil expenditures. 
+
+ 
+The estimates included in the report were:
+$$ \widehat{math4_i} = {74.870} - {0.001}*exppp_i$$  
+where *math4* is the percent of 4th graders with
+a passing grade on the state-wide math exam for a particular school and
+*exppp* is per pupil spending for that school. The coefficient on *exppp* was reported to be statistically
+insignificant.
+
+You believe that the model used in the report is underspecified. That is, it has omitted an important variable
+from the model. Specifically, you believe that the percent of students from low-income families in a school
+(the variable *lunch*)
+should be included in the model for the model to be correctly specified. Without *lunch* in the model, the estimated coefficient on *exppp* reported above is likely to be biased.
+
+Your task is to help your fellow intern understand the danger of omitted variable bias. To help you do this,
+you complete the following tasks.
+
+(a) First, explain what each of the four parameters in the omitted variable bias equation represent 
+for this report: 
+
+$$ E(\widetilde{\beta_1}) = \hat{\beta_1} + \widetilde{\delta_1}\hat{\beta_2}$$
+
+Write the meaning of each of the components below in terms that your fellow intern will understand. 
+The meaning should be specific to this
+economic question. The meaning should not include a numerical estimate.
+
+**Write your answers below.**
+
+(5 points) **$E(\widetilde{\beta_1})$:          **
+
+(5 points) **$\hat{\beta_1}$:                   **
+
+(5 points) **$\widetilde{\delta_1}$:            **
+
+(5 points) **$\hat{\beta_2}$:                   **
+
+(10 points) Explain in a sentence or two, how the omitted variable bias equation applies to the conclusion the
+intern drew from the analysis in the draft report.
+
+**Write your answer here:                       **
+
+
+
+Next, run the following three models, and present the results side-by-side in stargazer. Don't discuss the results
+until the parts that follow.
+
+(b) (10 points) Replicate the other intern's results using the *meap01* dataset.
+
+(c) (10 points) Run the correct model, that is, add the variable *lunch* to the model.
+
+(d) (10 points) Run the additional model required to explain omitted variable bias.
+
+```{r}
+
+# lm.omitvarbias <- 
+# lm.corrected   <- 
+# lm.additional  <-
+
+#stargazer(lm.omitvarbias, lm.corrected, lm.additional, type="text",
+#         title="put a relevant title here")
+
+
+```
+
+(e) (10 points) Using the estimated coefficients as needed from the three regressions, 
+quantify and explain the
+impact of omitted variable bias on the conclusions of the other intern's report.
+(you can just type in the actual values of the estimated coefficients rather than 
+using r-mini-chunks, to save time)
+
+**Write your answer here:                       **
+
+
+
+(f) (10 points) Fill in the following equation to report the estimated results from the correctly specified model. 
+
+$$ \widehat{math4_i} = {???} + {???}*exppp_i + ???*lunch_i$$ 
+
+Write a concluding paragraph that discusses what this analysis can say about the impact of school spending on school performance.
+
+**Write your answer here:                       **
+
