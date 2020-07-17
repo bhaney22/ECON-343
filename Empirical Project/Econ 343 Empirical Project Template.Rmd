@@ -97,10 +97,7 @@ What are the explanatory variables in the model?
 
 
 - Briefly summarize what is known so far based on your literature review. 
-Make sure you add every citation to your econ343*name*.bib file and include
-them in the write-up. Follow the 
-instructions in the Lecture regarding Zotero. Find further suggestions in
-the Wooldridge.
+Make sure you add every citation to your references at the end of the report.
 
 - Describe in detail how your primary paper contributes to understanding this
 question. What does it conclude? What data does it use? 
