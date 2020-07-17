@@ -1,9 +1,9 @@
 ---
 title: "Econ 343 Ch 10 HW Key"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
   word_document: default
   beamer_presentation: default
 ---
@@ -67,8 +67,12 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 
 ``` {r}
 
-load("consump_v1.RData")      # <<<<< change this to your own Cengage version 
-mytsdata <- ts(Data,start = 1959) 
+# load("consump_v1.RData")      # <<<<< change this to your own Cengage version 
+# mytsdata <- ts(Data,start = 1959) 
+
+mytsdata <- ts(consump,start = 1959) 
+
+
                                      
 as_tibble(mytsdata)
 
