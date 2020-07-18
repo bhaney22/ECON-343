@@ -49,3 +49,10 @@ Ch 7 R Lecture.Rmd
 
 - using mutate(case_when) to create dummy variables
 - commands to evaluate dummy variable regressions (linear probability models)
+
+Ch 10 R Lecture.Rmd
+
+- tsdata <- ts(dsname, start=yyyy) - make time series data
+- `dynlm()` is time Series version of `lm()`
+- lm <- dynlm(y ~ x1 + L(x1) + L(x1,2) + x2, data=tsdata) - Lags
+- trend(tsdata) - trends in regression model
