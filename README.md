@@ -1,15 +1,11 @@
 # ECON-343
-This repository contains the most up to date version of the Lecture, Homework template, and the Empirical Project Rmarkdown files.
+## Description
+This repository contains the Rmarkdown files for all Econ 343 Lectures, Homeworks, and the Empirical Project. 
 
-**Instructions**
-- Scroll up and click on the name of the folder (Lectures, Homework, or Empircal Project).
-- Right-click on the .Rmd file and click "Save link as" to download it
-- Or, you can double-click on the .Rmd file to open it 
-  - Copy and paste the contents of the .Rmd file into a **new text file** in Rstudio 
-  - Save the new file with the correct name and give it a **.Rmd** file extension
+## Instructions
+Copy of this repository to your Rstudio home directory at the beginning of class.
 
-
-**See below for an index of R commands introduced in each Ch 00 R Lecture.Rmd file**
+## Index of R commands introduced in each Ch 00 R Lecture.Rmd file
 
 Ch 2 R Lecture.Rmd
 
