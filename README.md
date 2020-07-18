@@ -1,4 +1,7 @@
-# ECON-343
+# ECON-343 Introductory Econometrics
+Calvin University
+Dr. B. Haney
+
 ## Description
 This repository contains the ECON 343 Rmarkdown files for all Lectures, Homeworks, Practice Exams, Tutorials, and the Empirical Project. Follow the "**Get Started**" instructions to get started.
 
@@ -17,3 +20,5 @@ This repository contains the ECON 343 Rmarkdown files for all Lectures, Homework
     - Click on "**File**" from the top menu, then choose "**Share Project**"
     - In the middle box, enter "**brh22**"
     - Click "**OK**"
+    
+Congratulations! You are now ready to start using Rstudio, Rmarkdown, and R to learn Introductory Econometrics. 
