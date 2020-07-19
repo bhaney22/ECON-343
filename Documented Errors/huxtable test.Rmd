@@ -1,0 +1,16 @@
+---
+title: "huxtable test"
+output:
+  pdf_document: default
+---
+
+
+```{r}
+library(huxtable)
+ fred = summary(mtcars)
+ fred
+ 
+  ht1 = as_huxtable(fred)
+  ht1
+
+```
