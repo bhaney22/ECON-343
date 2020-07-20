@@ -1,6 +1,10 @@
 # https://github.com/tidyverse/dplyr/issues/5424#issue-660888298
 # https://github.com/gdemin/expss/issues/68 (CLOSED - haven problem)
 
+# I believe this is related to this haven::labelled_spss open issue:
+# https://github.com/tidyverse/haven/issues/534#issue-656435577
+
+
 library(reprex)
 
 reprex({
@@ -42,4 +46,3 @@ mytest <- mytest %>%
 # sessionInfo()
 })
 
- 
