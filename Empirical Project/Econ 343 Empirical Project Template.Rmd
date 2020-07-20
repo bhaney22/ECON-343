@@ -26,7 +26,6 @@ library(DataExplorer) # nice commands to learn about a new data set
 library(stargazer)  # nice regression output
 library(ggformula)  # easy graphing interface for ggplot
 library(mosaic)     # accompanies ggformula
-library(haven)
 library(expss)      # apply_labels() cro()
 
 library(AER)        # data and commands specific to econometrics
@@ -46,8 +45,6 @@ options(knitr.duplicate.label = 'allow')
 
 ```
 
-UPDATE: 7.11.2020 - revised to use example from GSS data
-UPDATE: 7.11.2020 - revised to read in saved file from ECON 343 Exploratary Analysis.Rmd
 
 # Project Summary
 
@@ -138,6 +135,7 @@ load("~/ECON 343/Empirical Project/mygss.RData")
 mydata <- mygss
 stargazer(mydata,type = "text")
 as_tibble(mydata)
+
 ```
 
 # Preliminary Analysis
@@ -187,7 +185,7 @@ when controlling for age. Age is still stat. sig. even after controlling for mal
 # Use this command as a template to compare Means of Quantitative variables by categories
 mydata %>%
   tab_cols(teamwork) %>%                        # columns represent categories to compare
-  tab_cells(INCOME,WEALTH,AGE,EDUC) %>%            # cells are the continuous variables
+  tab_cells(INCOME,INCOME16,WEALTH,AGE,EDUC) %>%            # cells are the continuous variables
   tab_stat_mean_sd_n() %>%
   tab_last_sig_means() %>%                    # test for significant differences 
   tab_pivot()
@@ -200,7 +198,7 @@ significance of the other variables might show up if age is controlled for. Let'
 ```{r}
 mydata %>%
   tab_cols(agegrp %nest% teamwork)     %>%            # "nested" columns are categories within categories
-  tab_cells(INCOME,WEALTH,AGE,EDUC)    %>%            # cells are the continuous variables            
+  tab_cells(INCOME,INCOME16,WEALTH,AGE,EDUC)    %>%            # cells are the continuous variables            
   tab_stat_mean_sd_n()            %>%
   tab_last_sig_means()            %>%
   tab_pivot()
@@ -279,7 +277,7 @@ in your model.
 
 
 ```{r}
-lm.mydata <- mydata %>% select(teamwork,EDUC,female,AGE,agegrp,collgrad,INCOME,region)
+lm.mydata <- mydata %>% select(teamwork,EDUC,female,AGE,agegrp,collgrad,INCOME,INCOME16,region,WTSSALL,INCOME16)
 lm.mydata <- na.omit(lm.mydata)
 
 stargazer(lm.mydata,type = "text")
@@ -289,7 +287,9 @@ stargazer(lm.mydata,type = "text")
 
 ## Regression Results
 ```{r}
-lm1 <- lm(teamwork ~ EDUC + AGE + female + collgrad, data = lm.mydata)
+lm1 <- lm(teamwork ~ EDUC + AGE + female + collgrad, 
+          data = lm.mydata,
+          weights = WTSSALL)
 
 stargazer(lm1,type="text")
 
@@ -311,7 +311,7 @@ lm1.data <- lm.mydata %>%
 range_yhat <- range(lm1.data$yhat)
 gt1_yhat   <- count(lm1.data$yhat > 1)
 
-cro_cpct(lm1.data$teamwork, lm1.data$yhat_dummy)
+calc_cro_cpct(lm1.data,teamwork,yhat_dummy,weight = WTSSALL)
 
 ```
 
@@ -332,14 +332,17 @@ lm1.data <- lm1.data %>%
                                   yhat_dummy != teamwork ~ 0))
 
 # overall correct prediction rate
-Pct_correct_pred <- mean(lm1.data$correct_pred)
+Pct_correct_pred <- mean(lm1.data$correct_pred) * 100
 
 # percent of ecobuyers correctly predicted
 Pct_correct_teamworker <- mean(lm1.data$correct_pred[lm1.data$teamwork == 1]) * 100
 
 # percent of non-ecobuyers correctly predicted
 Pct_correct_soloworker <- mean(lm1.data$correct_pred[lm1.data$teamwork == 0]) * 100
-                            
+
+Pct_correct_pred 
+Pct_correct_teamworker
+Pct_correct_soloworker
 ```
 
 **Write-up** This model does a decent job at predicting beliefs about court sentencing. But, much better for predicting those who believe sentences should be harsher than those who don't.
@@ -364,11 +367,9 @@ qualitatively similary results
 For this example, let's see if the regression is different if we run exclude workers living in the West (silicon valley).
 
 ```{r}
-cro(lm.mydata$region)
 
 lm2 <- lm(teamwork ~ EDUC + AGE + female + collgrad, 
-          data = lm.mydata %>% 
-            filter(region != "West"))
+          data = lm.mydata)
 
 stargazer(lm1,lm2,type="text")
 
