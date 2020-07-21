@@ -11,7 +11,7 @@ This repository contains the ECON 343 Rmarkdown files for all Lectures, Homework
 2. Click on "**File**" from the top menu, then choose "**New Project**"
 3. Choose "**Version Control**: *Check out a project from a version control repository.*" (the third option for creating a new project)
 4. Choose "**Git**" as the type of version control repository. 
-5. Three boxes will pop up:
+5. Fill in the three boxes that pop up:
     - Copy and paste this URL into the first box: **https://github.com/bhaney22/ECON-343.git**
     - Give your project the name "**ECON-343-yourlastnamefirstintial**"
     - Make sure the last box is set to your home directory: "**~**" (the tilde)
