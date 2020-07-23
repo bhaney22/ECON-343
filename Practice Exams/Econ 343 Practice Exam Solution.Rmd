@@ -131,11 +131,30 @@ the model results will not work with the lht() command later on.
 
 mydata <- loanapp
 
-mydata$haskid <- NULL
-mydata$haskid[mydata$dep == 0] = 0
-mydata$haskid[mydata$dep >  0]= 1
+mydata <- mydata %>%
+  mutate(haskid = case_when(dep == 0 ~ 0, dep >  0 ~ 1))
 
-lm.loana  <- lm(approve ~ married + appinc + haskid,data=mydata,na.action=na.exclude)
+mydata %>%
+  tab_cells(loanamt,emp,loanprc,apr,rep) %>%
+  tab_cols(approve) %>%
+  tab_stat_mean_sd_n() %>%
+  tab_last_sig_means() %>%
+  tab_pivot()
+
+mean(mydata$loanamt)
+```
+
+I choose to add the variable "loanprc" or loan to price of house ratio
+because it is statistically significant and because it is a ratio
+it is not sensitive to scale effects, like "apr" the appraised value is.
+```{r}
+lm.data   <- mydata %>% 
+  select(approve,married,appinc,haskid,loanprc) %>%
+  drop_na()
+
+lm.loana  <- lm(approve ~ married + appinc + 
+                  haskid + loanprc,
+                data=lm.data)
 
 stargazer(lm.loana,type="text")
 
@@ -153,35 +172,35 @@ of the coefficients on *married*, *haskid* and *the additional variable you incl
 (e) (10 points) Does the model result in any unreasonable estimated probabilities? Explain.
 
 ```{r}
+lm.data <- lm.data %>%
+  mutate(yhat = fitted(lm.loana),
+         yhat_dummy = case_when(yhat >= .5 ~ 1, yhat < .5 ~ 0),
+         corr_pred = case_when(yhat_dummy == approve ~ 1, 
+                               yhat_dummy != approve ~ 0))
+min(lm.data$yhat)
+max(lm.data$yhat)
 
-mydata$yhat <- fitted(lm.loana)
-count(mydata$yhat<0)
-count(mydata$yhat>1)
-
+gf_histogram(~ yhat, data = lm.data)
 ```
 
 (f) (10 points) What proportion approvals are correctly predicted by this model? What do you conclude from this?
 
 ```{r}
 
-mydata$yhat <- fitted(lm.loana)
-favstats(mydata$yhat)
+mean(lm.data$corr_pred)
 
-mydata$yhat_dummy <- NULL
-mydata$yhat_dummy[mydata$yhat>=.5] = 1 
-mydata$yhat_dummy[mydata$yhat <.5] = 0 
 
-mydata$corr_pred <- NULL
-mydata$corr_pred[mydata$yhat_dummy == mydata$approve] = 1
-mydata$corr_pred[mydata$yhat_dummy != mydata$approve] = 0
-
-favstats(mydata$corr_pred)
 ```
 
 (g) (10 points) What proportion of married and unmarried applicants are correctly predicted? What do you conclude from this? 
+
 ``` {r}
-favstats(mydata$corr_pred[mydata$married==1])
-favstats(mydata$corr_pred[mydata$married==0])
+mean(lm.data$corr_pred[lm.data$married == 0])
+mean(lm.data$corr_pred[lm.data$married == 1])
+
+#  OR  #
+
+calc_cro_cpct(lm.data,corr_pred, married)
 ```
 
 
@@ -234,6 +253,7 @@ stargazer(lm1,lm2,lm3,type="text",
 
 (g) (10 points) Write a concluding paragraph (or a set of bullet points) that discusses what this analysis can say about
 the impact of school spending on school performance.
+
 
 
 
