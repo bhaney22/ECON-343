@@ -103,7 +103,7 @@ as 1 more year of tenure for this group of college-educated workers. What do you
 lht(Model.1,"exper=tenure")
 ```
 
-**ANSWER: They do appear to have different effects. We fail to reject that the coefficients are
+**ANSWER: They do appear to have different effects. We reject the null hypothesis that the coefficients are
 equal to each other.**
 
 # 2 Mortgage approval and Married
