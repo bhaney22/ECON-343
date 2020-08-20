@@ -1,8 +1,6 @@
 ---
-title: "Empirical Project Exploratory Analysis lastname, firstname"
+title: "Empirical Project Part 1 ** Add Lastname Firstinitial **"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     number_sections: yes
     toc: yes
@@ -12,28 +10,16 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-#
-# Always include these packages in R projects for this class
-#
-library(readr)      # for reading in .csv files
-library(tidyverse)  # data wrangling
-library(dplyr)      # for filter and select commands. etc.
-
 library(wooldridge) # datasets in the textbook
-library(stats)      # basic statistic commands
-library(DataExplorer) # nice commands to learn about a new data set
+library(dplyr)      # data wrangling
 library(stargazer)  # nice regression output
 library(ggformula)  # easy graphing interface for ggplot
-library(mosaic)     # accompanies ggformula
-library(haven)      # reading in .dta and .sav data (other stats packages)
-library(expss)      # apply_labels() cro()
-
-library(AER)        # data and commands specific to econometrics
+library(haven)
+library(expss)      # apply_labels() calc_cro() tables
 library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
 library(lmtest)     # post-reg tests coeftest()
 library(effects)    # to plot effects of one regressor, holding all others constant
 library(visualize)  # to visualize hypothesis test p-values
-
 library(dynlm)      # lm commands for time series data
 library(plm)        # lm commands for panel data
 
@@ -62,17 +48,16 @@ https://gss.norc.org/get-the-data/spss
 5. You can add more variables from the GSS by adding them to the "select" statement
 
 ```{r}
-mygss <- as.data.frame(read_sav("GSS/GSS2018.sav")) %>%
-  select(YEAR,ID,WRKSTAT,SEX,RACE,RINCOME,INCOME,WEALTH,REGION,
-         AGE,MARITAL,CHILDS,EDUC,DEGREE,
-         PARTYID,PRES16,NATEDUC,COURTS,TAX,NATFARE,
-         PARTTEAM) 
+mygss <- read_dta("GSS/GSS2018.dta") %>%
+#  select(YEAR,AGE,SEX,RACE,INCOME16,TAX) %>%
+   select(year,id,sex,race,income16,tax) %>%
+  head(50)
 
-stargazer(mygss,type="text", 
+stargazer(as.data.frame(mygss),type="text", 
           digits = 0, 
           summary.stat = c("n","min","max","median","mean","sd"))
 
-as_tibble(mygss)
+
 ```
 
 
@@ -103,31 +88,27 @@ for some variables a '9' indicates Don't Know and sometimes '0' indicates IAP (i
 for each variable that you need to recode
 - Value labels for most of the variables are in the following r chunk
 
-``` {r include =FALSE}
-val_lab(mygss$WRKSTAT)
-val_lab(mygss$SEX)
-val_lab(mygss$RACE)
-val_lab(mygss$RINCOME)
-val_lab(mygss$INCOME)
-val_lab(mygss$WEALTH)
-val_lab(mygss$REGION)
+``` {r}
 
-val_lab(mygss$AGE)
-val_lab(mygss$MARITAL)
-val_lab(mygss$CHILDS)
-val_lab(mygss$EDUC)
-val_lab(mygss$DEGREE)
+varnames <- names(mygss)
 
-val_lab(mygss$PARTYID)
-val_lab(mygss$PRES16)
+for (x in 1:length(varnames)) {
+  varname  = varnames[x]
+  varlabel = var_lab(mygss[[x]])
+  vallabel = val_lab(mygss[[x]])  %d% NA   # Get rid of labels that have NA values (user missings)
 
-val_lab(mygss$NATEDUC)
-val_lab(mygss$COURTS)
-val_lab(mygss$NATFARE)
-val_lab(mygss$TAX)
+print(paste(varname,varlabel))
+  if(!is.null(val_lab(mygss[[x]]))) {
+    print(val_lab(mygss[[x]]))
+  }
+}
+```
 
-val_lab(mygss$PARTTEAM)
+``{r}
 
+attributes(mygss$tax)
+mygss$tax = add_labelled_class(mygss$tax, remove_classes = c("haven_labelled", "spss_labelled", "vctrs_vctr", "double")) 
+attributes(mygss$tax)
 ```
 
 ### Step 2. Use `mis_val()`
@@ -142,25 +123,22 @@ UPDATE: 7.11.2020 - Remove the "with_labels = TRUE" option. That can cause error
 
 ```{r}
 
-# Demographic variables...
-mygss$RINCOME <- mis_val(mygss$RINCOME,c(0,13,98,99),with_labels = TRUE)
-mygss$INCOME  <- mis_val(mygss$INCOME,c(0,13,98,99),with_labels = TRUE)
-mygss$WEALTH  <- mis_val(mygss$WEALTH,c(0,98,99),with_labels = TRUE)
-mygss$AGE     <- mis_val(mygss$AGE,c(98,99),with_labels = TRUE)
-mygss$EDUC    <- mis_val(mygss$EDUC,c(97,98,99),with_labels = TRUE)
-mygss$RACE    <- mis_val(mygss$RACE, 0,with_labels = TRUE)
-mygss$DEGREE  <- mis_val(mygss$DEGREE, c(7,8,9),with_labels = TRUE)
-mygss$MARITAL <- mis_val(mygss$MARITAL, c(9),with_labels = TRUE)
-mygss$CHILDS  <- mis_val(mygss$CHILDS, c(9),with_labels = TRUE)
-mygss$WRKSTAT <- mis_val(mygss$WRKSTAT, c(0,9),with_labels = TRUE)
-mygss$REGION  <- mis_val(mygss$REGION, 0,with_labels = TRUE)
-mygss$PARTYID <- mis_val(mygss$PARTYID, c(8,9),with_labels = TRUE) 
-mygss$PRES16  <- mis_val(mygss$PRES16, c(0,3,4,8,9),with_labels = TRUE)
-mygss$COURTS  <- mis_val(mygss$COURTS, c(0,8,9),with_labels = TRUE)
-mygss$NATEDUC <- mis_val(mygss$NATEDUC, c(0,8,9),with_labels = TRUE)
-mygss$NATFARE <- mis_val(mygss$NATFARE, c(0,8,9),with_labels = TRUE)
-mygss$TAX     <- mis_val(mygss$TAX, c(0,8,9,4),with_labels = TRUE)
-mygss$PARTTEAM   <- mis_val(mygss$PARTTEAM, c(0,8,9),with_labels = TRUE)
+# Missings:
+
+mygss <- mygss %>%
+  mutate(income16 = case_when(income16 == 98 | income16 == 99) ~ NA)
+
+mygss$tax  <- mis_val(mygss$tax, c(4))
+
+# Dummy variables and collapsed categories
+mygss <- mygss %>%
+  mutate(tax.dummy = case_when(tax == 1 ~ 1,
+                               tax == 2 | tax == 3 ~ 0))
+
+stargazer(as.data.frame(mygss),type="text", 
+          digits = 0, 
+          summary.stat = c("n","min","max","median","mean","sd"))
+
 
 ```
 
@@ -340,10 +318,6 @@ drop_rc(cro_cpct(mygss$INCOME))
 drop_rc(cro_cpct(mygss$WEALTH))
 drop_rc(cro_cpct(mygss$party))
 drop_rc(cro_cpct(mygss$PRES16))
-
-val_lab(mygss$DEGREE)
-
-table(mygss$DEGREE)
 
 ```
 
