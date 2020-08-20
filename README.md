@@ -1,4 +1,4 @@
-# ECON-343 Introductory Econometrics
+# ECON-343 Introduction to Econometrics
 Calvin University
 Dr. B. Haney
 
