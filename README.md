@@ -20,5 +20,6 @@ This repository contains the ECON 343 Rmarkdown files for all Lectures, Homework
     - Click on "**File**" from the top menu, then choose "**Share Project**"
     - In the middle box, enter "**brh22**"
     - Click "**OK**"
+8. Click on "Help/Cheatsheets" in the top navigation bar and look at the ones for Rmarkdown and R. You will reference these frequently!
     
 Congratulations! You are now ready to start using Rstudio, Rmarkdown, and R to learn Introductory Econometrics. 
