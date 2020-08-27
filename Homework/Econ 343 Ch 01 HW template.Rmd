@@ -21,17 +21,13 @@ output:
 # suited for economic and business analysis. You might find it useful to keep this template and
 # set of packages for future data analysis projects.
 #
-library(readr)      # for reading in .csv files
-library(tidyverse)  # data wrangling
 library(dplyr)      # for filter and select commands. etc.
 library(wooldridge) # datasets in the textbook
 library(stats)      # basic statistic commands
-library(DataExplorer) # nice commands to learn about a new data set
 library(stargazer)  # nice regression output
 library(ggformula)  # easy graphing interface for ggplot
 library(mosaic)     # accompanies ggformula
 library(expss)      # apply_labels() cro()
-library(AER)        # data and commands specific to econometrics
 library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
 library(lmtest)     # post-reg tests coeftest()
 library(effects)    # to plot effects of one regressor, holding all others constant
