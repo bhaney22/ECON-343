@@ -177,6 +177,7 @@ my_fave_numbers
 Try making a list of your three favorite numbers, then using the function `sum` to add them all up:
 
 ```{r c-and-sum, exercise=TRUE}
+
 ```
 
 ```{r c-and-sum-hint, results='hide'}
