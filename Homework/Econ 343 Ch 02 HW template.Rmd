@@ -59,9 +59,12 @@ CAUTION! This Rmarkdown file will not knit until you complete the commands
 as indicated below with **TODO:**.
 
 ```{r}
-#Load the dataset manually because each Cengage assignment is a different version
-load("~/20SU ECON 343/Homework/401k_v4.RData")
+## Upload your version of the data from Cengage to Rstudioand point the load command
+## to its location and give it the correct name
+
+load("~/ECON 343-yourname/Homework/401k_v?.RData")
 mydata <- Data  
+
 as_tibble(mydata)  
 ```
 
@@ -76,8 +79,8 @@ The average participation rate in 401k plans in this dataset is **`r avg_prate`*
 ## Part (ii)
 ```{r}
 # TODO: uncomment the correct lm() model below
-#lm.1 <- lm(prate ~ mrate,data=mydata) 
-#lm.1 <- lm(mrate ~ prate,data=mydata) 
+#lm.1 <- lm(prate ~ mrate,data=mydata)   # regresses prate on mrate
+#lm.1 <- lm(mrate ~ prate,data=mydata)   # regresses mrate on prate
 
 stargazer(lm.1,type="text")   # presents nicely formatted regression results
 
@@ -96,13 +99,69 @@ rate of employees
 increases on average by **`r bhat["mrate"]`** percentage points.
 
 ## Part (iii)
-For a \$0.30 increase in how much the company contributes, the participation
-rate of employees increases on average by **`r 0.30 * bhat["mrate"]`** percentage points.
+```{r}
+
+result_1 <- 0.30 * bhat["???"]
+
+```
+
+For every \$0.30 increase in how much the company contributes for every \$1.00 the
+employee contributes, the participation
+rate of employees increases on average by **`r result_1`**.
+
+**Explanation**:
+- The interpretation formula for estimated coefficients is: 
+**For every 1 unit increase in X, Y increases on average by **$\hat{\beta_?}$.**
+
+
+- So, for a 0.30 unit increase in X, the average increase in Y will be 0.30 multiplied by
+the value of the estimated coefficient on X. 
+
+- 0.30 times $\hat{\beta}_{mrate}$ = 0.30 times `r bhat["mrate"]` = **`r result_1`** percentage points. 
 
 ## Part (iv)
-A company that has a matching rate of 1.5 is expected to have **`r bhat["(Intercept)"] + (1.5 * bhat["mrate"])`** participation rate in
-401k plans by its employees.
+
+```{r}
+
+result_2 <- bhat["(Intercept)"] + (1.5 * ????["mrate"])
+
+```
+
+
+A company that has a matching rate of 1.5 is expected to have **`r result_2`** participation rate in
+401k plans by its employees, based on the estimated regression equation below:
+
+$$\widehat{prate} = \hat{\beta_0} + \hat{\beta_1} * \textbf{mrate}$$
+$$\widehat{prate} = `r bhat["(Intercept)"]` + `r bhat["mrate"]` * \textbf{mrate}$$
+
+$$\widehat{prate} = `r bhat["(Intercept)"]` + `r bhat["mrate"]` * 1.5$$
+
+$$\widehat{prate} = `r bhat["(Intercept)"] + bhat["mrate"] * 1.5`$$
 
 ## Part (v)
-The *R-squared* value for this estimated regression model is 
-**`r var(fitted(lm.1)) / var(mydata$prate)`**. 
+```{r}
+actual_y     <- mydata$prate
+fitted_y     <- fitted(lm.1)
+var_fitted_y <- var(fitted_y)
+var_actual_y <- ???
+r_sq_by_hand <- ???
+```
+
+The *R-squared* value (calculated by hand) for this estimated regression model is 
+**`r ______`**. 
+
+Explanation:
+The *R-squared* value for an estimated regression model is calculated as the percent
+of the total variance in the dependent variable that is explained by the regression model.
+One way to calculate this, is to divide the variance of the fitted values by the variance of the actual values.
+
+The total variance in the actual values of the dependent variable is
+$$var(y) = var(prate) = `r _____`$$ 
+
+The variance of the fitted values of the dependent variable is
+$$var(\hat{y}) = var(fitted) = `r _______`$$
+
+The variance 
+explained by the regression model is thus: 
+$$\frac{var(fitted)}{var(actual)} = \frac{`r _____`}{`r _____`} = `r _______`$$.
+
