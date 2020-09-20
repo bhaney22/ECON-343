@@ -1,0 +1,113 @@
+---
+title: "Econ 343 Ch 3 C4 HW Lastname, firstname"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+# Ch 03 Computer Assignment C4 - Attendance
+
+
+# Part (i)
+
+```{r}
+# Download the dataset from Cengage and then upload the dataset to Rstudio
+# change the location of the dataset in the load command, as needed
+
+load(" ??? ")
+mydata <- Data
+
+# ==> Use the min,max, and mean values from the stargazer output below
+# ==> answer part (i)
+stargazer(mydata, type = "text")
+
+
+```
+
+
+
+## Part (ii)
+
+
+```{r}
+# ==> Run the regression and display the results
+lm2 <- lm(??? ~ ???  ,data = mydata)
+stargazer(lm2,type = "text",digits = 2)
+
+# ==> Save the estimated coefficients from the regression
+# ==> to use in the calculations needed to answer the next parts
+# ==> of the Cengage question
+bhat2   <- coef(lm1)   # ALL COEFFICIENTS are saved in the VECTOR "bhat1"
+bhat_0  <- bhat2["(Intercept)"]  # ONE coeffcient from the vector
+bhat_??? <- bhat2["???"]        # ONE coeffcient from the vector
+bhat_??? <- bhat2["???"]        # ONE coeffcient from the vector
+
+```
+
+
+
+
+## Part (iii)
+
+```{r}
+
+
+```
+
+
+## Part (iv)
+
+```{r}
+
+
+```
+
+
+## Part (v)
+
+```{r}
+
+
+```
+
+
+
