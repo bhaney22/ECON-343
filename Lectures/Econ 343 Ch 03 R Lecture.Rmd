@@ -270,7 +270,7 @@ lm3 <- lm(lunch  ~ log(exppp), data=mydata)
 ``` {r echo = FALSE}
 #To adjust table size with stargazer, you can change the font size font.size=, #make the Stargazer single row single.row = TRUE and change the space between #columns column.sep.width = "1pt" in stargazer().
 
-stargazer(lm2,lm3,
+stargazer(lm2,lm1,
           column.labels = c("True Model","Omitted Var Regression"),
           type="text",
           digits = 2,

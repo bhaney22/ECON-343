@@ -48,7 +48,7 @@ library(plm)        # lm commands for panel data
 options(digits=4)   # limits number of decimals to 4 when printing
 knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
 ```
-### R Commands introduced in this lecture:
+# R Commands introduced in this lecture:
 
 - I()
 - scale()
