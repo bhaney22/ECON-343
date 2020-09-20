@@ -1,0 +1,266 @@
+---
+title: "Econ 343 Midterm 1 Review"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_levels: 1
+    number_sections: false
+---
+
+```{r setup, include=FALSE}
+#
+# Always include these packages in R projects for this class
+#
+library(readr)      # for reading in .csv files
+library(dplyr)      # for filter and select commands. etc.
+
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests
+library(lmtest)     # post-reg tests
+library(effects)    # to plot partial effects for one regressor
+library(visualize)  # to visualize hypothesis test p-values
+
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)
+options(scipen=999)
+
+knitr::opts_chunk$set(echo = TRUE,cache=FALSE)
+```
+
+
+# The Five Steps of Economic Analysis
+
+1. Start with an **Economic Question**.
+
+2. Provide an **Economic Model** that identifies the variable you
+want to explain (the dependent variable), and lists the primary explanatory variable(s) and (optionally) additional control variable(s). 
+
+3. Specify the **Econometric Model** by specifying a linear equation
+that represents the relationship between the variables. 
+
+4. Estimate the regression model to obtain the 
+**estimated regression coefficients** on the explanatory variables ($\hat{\beta_x}$s) and interpret what they mean.
+
+5. Use post-regression analysis to test hypotheses and make predictions.
+
+## Example
+
+
+### 1. Economic Question
+
+#### How much does the size and number of bedrooms of a house affect its price?
+
+### 2. Economic Model
+
+$$price = f(size, bedrooms, location, location, location)$$
+
+### 3. Econometric Model
+
+$$price = \beta_0 + \beta_1 sqrft + \beta_2 bdrms + u $$
+
+### 4. Estimated Regression
+
+To examine this question, house price, sq. ft, number of bedrooms, and other 
+information was gathered on homes from the real estate pages of the *Boston Globe* newspaper in 1990. The dataset *hprice1* accompanies the 
+Wooldridge textbook and is loaded with the wooldridge package.
+
+```{r}
+mydata <- hprice1
+stargazer(as.data.frame(mydata), type = "text")
+
+```
+
+
+#### House price (in thousands) is regressed on sq. footage and number of bedrooms. 
+
+```{r}
+
+# ==> Run the regression and display the results
+lm1 <- lm(price ~ bdrms + sqrft ,data = mydata)
+stargazer(lm1,type = "text",digits = 2)
+
+# ==> Save the estimated coefficients from the regression
+bhat1   <- coef(lm1)   # ALL COEFFICIENTS are saved in the VECTOR "bhat1"
+bhat_0  <- bhat1["(Intercept)"]  # ONE coeffcient from the vector
+bhat_sf <- bhat1["sqrft"]        # ONE coeffcient from the vector
+bhat_bd <- bhat1["bdrms"]        # ONE coeffcient from the vector
+
+```
+
+#### The estimated regression equation is:
+
+$$\widehat{price} =  `r round(bhat_0,2)` + `r round(bhat_sf,2)` sqrft +
+`r round(bhat_bd,2)` bdrms $$
+
+#### Interpretation: 
+
+- Each additional bedroom increases the expected price of a 
+house by **\$`r round(bhat_bd,2)`** (thousands), holding size constant.
+
+- Each additional square foot added to the size of a house a size, 
+increases the expected price of a house by 
+**\$`r round(bhat_sf,2)`** (thousands), 
+holding the number of bedrooms constant. 
+
+- Thus, for every additional 
+**100 s.f.** the expected price of the house increases by 
+**\$`r format(round(bhat_sf * 100 * 1000,2),big.mark=",")`**.
+
+
+### 5. Post-regression Analysis
+
+#### An 1,800 s.f., three bedroom house is listed for \$266,000. Is this a good deal?
+
+```{r}
+listprice  <- 266000
+predict_1  <- (bhat_0 + bhat_sf*1800  + bhat_bd * 3) * 1000
+residual_1 <- listprice - predict_1
+
+```
+
+- The expected price of a 1,800 s.f., 3 bedroom house is 
+**\$`r format(round(predict_1,2),big.mark=",")`** which
+is 
+**\$`r format(round(residual_1,2),big.mark=",")`**
+**less** than the list price. 
+
+- Thus, this house is **overpriced** relative to similar homes its size.
+
+# Gauss-Markov Assumptions
+
+If the G-M assumptions hold, then the estimates from a linear regression model
+are BLUE: **B**est **L**inear **U**nbiased **E**stimates
+
+1. Model is linear *in parameters*.
+2. The data are from a random sample.
+3. The explanatory variables are not perfectly collinear.
+4. The model does not omit any relevant variables. (Zero Conditional Mean)
+5. The error terms have the same variance across the range of x's. (Homoskedasticity)
+
+# Estimate a regression model
+
+## Economic Question: How does horsepower affect gas mileage?
+
+Use the "lm" command in R to estimate a linear regression model. Use
+the stargazer() command to display the results. The following
+example uses the *mtcars* dataset that comes with R.
+
+```{r}
+lm1 <- lm(mpg ~ hp + wt, data=mtcars)
+stargazer(lm1,type="text")
+```
+
+
+
+# Save the estimated coefficients and $R^2$
+
+``` {r}
+# ==> change "lm1" below to the name used to save the regression 
+model  <- lm1   
+
+# ==> the following variable is a VECTOR
+bhat   <- coef(lm1)          # all estimated coefficients
+
+# ==> the following variables are single VALUES
+bhat_0 <- bhat["(Intercept)"]
+bhat_hp <- bhat["hp"]
+bhat_wt <- bhat["wt"]
+r_sqr      <- summary(lm1)$r.squared
+
+```
+
+# Use the saved regression results
+
+- "bhat" is a VECTOR, a list that contains all estimated coefficients
+
+- To obtain the value of a single estimated coefficient from the vector, 
+put the name of the variable associated with the coefficient
+in double quotes inside square brackets [" "] after bhat, e.g. **bhat["hp"]**.
+
+# Use "inline" *R* in your write-ups
+
+- Inline R is used in the middle of a sentence to run an R command
+
+- The most common uses of inline R are to display an estimated
+coefficient, the result of some other statistical command, or a calculation
+
+- Results and calculated values from R chunks should always be obtained using R inline, never hardcoded (typed directly into the sentence). 
+
+# Write out the econometric and estimated models
+
+- The relationship between horsepower on gas mileage is estimated by regression *mpg* on horsepower (*hp*) on *mpg*: 
+
+$$mpg = \beta_0 + \beta_1 hp + \beta_2 wt + u$$
+
+- The estimated model is:
+$$\widehat{mpg} = `r bhat["(Intercept)"] ` + `r bhat["hp"] ` hp + `r bhat["wt"] ` wt$$.
+
+
+- Interpretation: The estimated coefficient on *hp* is 
+**`r bhat["hp"] `**. 
+An increase of 100 horsepower will reduce gas mileage on average by
+**`r abs(round(100*bhat["hp"],1))`** miles per gallon.
+
+- Interpretation: The estimated coefficient on *wt*(in 1,000 lbs) is 
+**`r bhat["wt"] `**. 
+An increase in weight by 1,000 lbs. will **reduce** gas mileage on average by
+**`r abs(round(bhat["wt"],1))`** miles per gallon.
+
+
+# Omitted Variable Bias
+
+## What happens if an important variable is left out of the model?
+
+- To illustrate what happens to the estimated coefficient 
+when there is an omitted variable, suppose that the true model is $mpg = \beta_0 + \beta_1 hp + \beta_2 wt + u$, as above, but the 
+estimated model does not include **wt**.
+
+- Unlike in real life, for this illustration we have the data 
+on the missing variable. 
+
+- We run two regressions in addition to the estimated regression: 
+
+1. the estimated model 
+2. the true model 
+3. the omitted variable regressed on the explanatory variable.
+
+```{r}
+lm.est  <- lm(mpg ~ hp, data=mtcars)
+lm.true <- lm(mpg ~ hp + wt, data=mtcars)
+lm.omit <- lm(wt  ~ hp,data=mtcars)
+stargazer(lm.est,lm.true,lm.omit, type="text")
+```
+
+
+## Estimating the bias term
+
+Use the regression results to calculate the elements for the bias equation, 
+$E[\tilde{\beta}_{hp}] = \hat{\beta}_{hp} + \hat{\beta}_{wt}*\tilde{\delta}_{hp}$
+
+where:
+
+- $\hat{\beta}_{wt}$ = the coefficient on **"wt"** from **lm.true**. This is the correlation between the omitted variable (**wt**) and the dependent variable **mpg**. It is **negative** as expected. Heavier cars get lower gas mileage.
+
+- $\tilde{\delta}_{hp}$ = the coefficient on **"hp"** from **lm.omit**. This is the correlation between the omitted variable (**wt**) and the included variable **hp**. It is **positive** as expected. More powerful cars are typically heavier than other cars.
+
+Because $\hat{\beta}_{wt}$ is negative and $\tilde{\delta}_{hp}$ is positive, the bias term is **negative**. The negative impact of **hp** on 
+miles per gallon is underestimated. 
+
+### Conclusion: 
+Because the bias is negative and the coefficient is negative, 
+the estimate from the
+underspecified model suggests that HP pulls down *mpg* **even more** 
+than it actually does. 
+In the true model where the weight of the car is controlled for, HP does not reduce gas mileage as severely.
+
