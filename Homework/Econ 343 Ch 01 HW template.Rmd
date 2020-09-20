@@ -61,7 +61,7 @@ INSTRUCTIONS: Fill in the blanks or "???" in the r-chunks and corresponding writ
 
 ```{r}
 #Load the meap01_v?? data manually since it is not in the wooldridge package
-load("~/meap01_v??.RData")
+load("~/Econ-343-newname/Homework/meap01_v5.RData")
 mydata <- Data
 as_tibble(mydata)
 ```
@@ -79,7 +79,7 @@ max_math4 <- max(mydata$math4)
 
 ```
 [NOTE: It is common practice to italicize names of variables, and
-bold numerical results, as in the following sentence.]
+**bold** numerical results, as in the following sentence.]
 
 The lowest *math4* passing rate is **`r min_math4`**. 
 
