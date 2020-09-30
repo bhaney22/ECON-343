@@ -84,13 +84,13 @@ $$depvar = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + u $$
 
 
 ```{r}
-# Download the STATA dataset from Cengage and then upload the dataset to Rstudio
+# Download the dataset from Cengage and then upload the dataset to Rstudio
 # change the location and version number of the dataset 
 # in the load command, as needed
 
-library(haven)
-mydata <- as.data.frame(read_dta("~/20SU ECON 343/Homework/Data/vote1_v2.dta"))
-stargazer(mydata, type = "text")  
+load("~/ECON 343/Homework/Data/vote1_v2.RData")
+mydata <- Data
+stargazer(as.data.frame(mydata), type = "text")  
 
 ```
 
@@ -173,17 +173,18 @@ $$depvar = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + u $$
 
 
 ```{r}
-# Download the STATA dataset from Cengage and then upload the dataset to Rstudio
+# Download the R dataset from Cengage and then upload the dataset to Rstudio
 # change the location and version number of the dataset 
 # in the load command, as needed
 
-library(haven)
+load("~/ECON 343/Homework/Data/401ksubs_v1.RData")
 
-# Use the as.data.frame() command to ensure the data can be used by stargazer()
-mydata <- as.data.frame(read_dta("~/20SU ECON 343/Homework/Data/401ksubs_v1.dta")) %>%
-  filter(fsize == 1)   #### NOTE: the problem asks that you only use single people
+# Notice in Cengage that the problem specifies only to use single people (fsize = 1)
+# The filter command below is how to choose a subset of the data such that fsize=1
 
-stargazer(mydata, type = "text")  
+mydata <- Data %>% 
+  filter(fsize == 1)
+stargazer(as.data.frame(mydata), type = "text")  
 
 ```
 
@@ -194,7 +195,7 @@ stargazer(mydata, type = "text")
 # Refer to the variable name that contains the computed results in
 # the inline r chunk in the write up below.
 
-num.single <- count(mydata)
+num.single <- nrow(mydata)
 
 # Use the following in an inline r chunk to include a comma separater
 # formatC(as.numeric(num.unmarried),big.mark = ",")
@@ -202,7 +203,7 @@ num.single <- count(mydata)
 
 ```
 The number of single people in the dataset is 
-**`r formatC(as.numeric(num.single),big.mark = ",")`**.
+**`r format(num.single,big.mark = ",")`**.
 
 
 ### Part (ii)
