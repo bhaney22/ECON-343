@@ -299,7 +299,7 @@ In the discussion of the results, it is important to be clear about every aspect
 
 ## Example Write-up
 
-To test the $H_0: \hat\beta_1 = 1$ against the two-sided alternative, 
+To test the $H_0: \beta_1 = 1$ against the two-sided alternative, 
 the following test statistic was computed:
 $$t = \frac{\hat{\beta_1} - 1}{se(\hat{\beta_1})} =
 \frac{`r bhat["hp"] ` - 1}{`r se["hp"] `} = `r tstat`$$.  
@@ -349,7 +349,9 @@ the lht() command, as in the r chunk below.
 
 ```{r}
 lm2     <- lm(lwage ~ jc + univ + exper,data=twoyear)
+stargazer(lm2,type="text")
 h1 <- lht(lm2,"jc = univ")
+
 h1
 ```
 
