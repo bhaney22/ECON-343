@@ -464,7 +464,7 @@ Why this works:
 - Let $\theta = \beta_1-\beta_2$
 - Solve for $\beta_1$: $$\beta_1=\theta + \beta_2$$. 
 - Plug this formula for $\beta_1$ in the original econometric model:
-$$log(wage)=\beta_0 + (\theta + \beta_2) JC + \beta_2 (totcoll) + u$$
+$$log(wage)=\beta_0 + (\theta + \beta_2) JC + \beta_2 (Univ) + u$$
 - Collect terms:
 $$log(wage)=\beta_0 + \theta JC + \beta_2 (JC + Univ) + u$$
 - Replace $(JC + Univ)$ with the new variable: $totcoll = JC + Univ$ to get the model to be estimated:
