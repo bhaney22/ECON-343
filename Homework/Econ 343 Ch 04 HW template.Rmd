@@ -141,6 +141,8 @@ $$\widehat{depvar} =
 # Step 1: create the variable dlexp
 # Step 2: replace log(expendB) with dlexp and re-run the regression
 # Step 3: use the estimated coefficient on log(expendA) to test the hypothesis
+
+mydata <- mydata %>%  mutate(dlexp = lexpendA - lexpendB)
 ```
 
 
