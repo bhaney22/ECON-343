@@ -162,7 +162,6 @@ pval   <- summary(model)$coef[,4]           # all p-values for coefficients
 # ==> the following variables are single VALUES
 r_sqr      <- summary(model)$r.squared
 adj_r_sqr  <- summary(model)$adj.r.squared
-df         <- summary(model)$df 
 sigma      <- summary(model)$sigma
 
 fstat <- summary(model)$fstatistic["value"] # the F-stat
@@ -201,18 +200,43 @@ $$t = \frac{\hat{\beta_1} - 0}{se(\hat{\beta_1})} =
 
 This test statistic is the same one provided in the regression results: the *t-stat* reported for $\hat\beta_1$ is `r  tstat["hp"] `.
 
-## Finding the p-value from the Student's t distribution
+## 1. Critical Value Approach
+
+- Use `qt(significance level, df)` in R console to find critical value
+- Compare absolute value of test statistic to C.V. 
+- Reject if |test statistics| > critical value.
+
+Example:
+
+Using a signficance level of .05, what is the critical value to compare the test statistic above against? 
+
+1. Obtain the degrees of freedom, df = n-k-1. This is provided in the saved results from the regression above as **`df2`**. 
+
+2. Use `qt(.05,df2)` in R to get the critical value
+
+3. Test whether the absolute value of the tstat is greater than the absolute value of the critical value. If true, then REJECT!
+
+```{r}
+cv <- qt(.05,df2)
+
+abs(tstat_by_hand) > abs(cv) 
+```
+
+
+## 2. P-value Approach
+
+### Finding the p-value from the Student's t distribution
 
 The value of the test statistic is placed on the *t* distribution and 
 the probability that is in the tail is the **p-value**.
 
-To determine the *p-value* for the test statistic use the R command *pt()*.
+To determine the *p-value* for the test statistic use the R command **`pt()`**.
 
 This command takes 2 argumments: 
 - *tstat* = the test statistic
 - *df* = degrees of freedom (df=n-k-1)
 
-The degrees of freedom were saved from the regression results in the variable "df".
+The degrees of freedom were saved from the regression results in the variable **`df2`**.
 
 The command **pt(tstat,df)** returns the probability to
 the **left** of the value *t-stat*. 
@@ -223,7 +247,12 @@ use a negative value for the t-stat by taking the absolute value and multiplying
 Multiply the p-value by 2 for a two-sided t-test.
 
 ```{r}
-pval_of_tstat_by_hand <- 2*pt(-abs(tstat_by_hand),df=df) 
+alpha = .05 
+
+pval_of_tstat_by_hand <- 2*pt(-abs(tstat_by_hand),df=df2) 
+
+pval_of_tstat_by_hand < alpha
+
 ```
 
 To verify, the *p-value* calculated by hand = `r pval_of_tstat_by_hand*100000` which
@@ -278,8 +307,8 @@ Suppose we want to conduct a two-sided test to see whether the coefficient is 1.
 M <- 1  # <= set the value of for the null hypothesis here
 
 tstat  <- (bhat["hp"] - M)/se["hp"]     # calculate *new* tstat
-pval_1 <-   pt(-1*abs(tstat),df) # obtain one-sided p-value
-pval_2 <- 2*pt(-1*abs(tstat),df) # obtain two-sided p-value
+pval_1 <-   pt(-1*abs(tstat),df2) # obtain one-sided p-value
+pval_2 <- 2*pt(-1*abs(tstat),df2) # obtain two-sided p-value
 ```
 
 
