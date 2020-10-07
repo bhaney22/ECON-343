@@ -46,9 +46,10 @@ options(digits=4)   # limits number of decimals to 4 when printing
 options(scipen=999) # prevents scientific notation
 knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
 ```
-### R and Rmarkdown syntax introduced in this lecture**
+# R and Rmarkdown syntax introduced in this lecture
 
 - **`summary()`** to save the regression results
+- **`qt()`** to obtain critical values from a probability distribution
 - **`pt()`** to obtain p-values from a probability distribution
 - **`lht()`**  to conduct linear hypothesis tests
 
