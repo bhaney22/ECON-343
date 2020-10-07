@@ -1,6 +1,9 @@
 ---
 title: "Econ 343 Ch 6 R Lecture"
 output:
+  pdf_document: default
+  ioslides_presentation: default
+  word_document: default
   html_document:
     number_sections: no
     toc: yes
@@ -8,8 +11,6 @@ output:
     toc_float: yes
     toc_levels: 2
   beamer_presentation: default
-  word_document: default
-  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -483,8 +484,8 @@ se <- se["(Intercept)"]
 
 ```
 
-- **$\hat\theta$ = `r point.estimate`**
-- **$se_{\hat\theta}$ = `r se`**
+- $\hat\theta = `r point.estimate`$
+- $se_{\hat\theta} = `r se`$ 
 
 Step 4. Find the *tval* for a 95% confidence interval with df = 84 (n-k-1) (using  `qt(alpha/2,df)` command in `R` 
 
@@ -511,7 +512,7 @@ upperci <- round(point.estimate + (tval*se),2)
 ** Use the results inline in the write-up.**
 
 $$`r point.estimate` \pm `r tval` * `r se`$$
-The confidence interval for expected price (in thousands) for houses with these characteristics as **[$`r lowerci`, $`r upperci`]**.
+The confidence interval for expected price (in thousands) for houses with these characteristics as **[\$`r lowerci`, \$`r upperci`]**.
 
 As a reminder, you will usually simply use the `predict()` command.
 However, it is good to know how to calculate a CI by hand 
@@ -522,7 +523,7 @@ and you will be asked to do this in your HW.
 
 - Predicting log(y) is straigtforward: $\hat{log(y)} = \hat\beta_x * x$
 - You cannot predict *y* by "un-logging" the predicted *log(y)*
-- $ \hat{y} \ne exp(\hat{log(y)})$
+- $\hat{y} \ne exp(\hat{log(y)})$
 - must multiply $exp(\hat{log(y)})$ by $exp(\hat{\sigma^2}/2)$
 - $\hat{\sigma^2}$ is the standard error of the regression (*ser*)
 - if the sample size is small - estimate $exp(\sigma^2/2)$ with the formula for $\hat\alpha$ on (p. 206)
