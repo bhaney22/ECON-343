@@ -1,0 +1,95 @@
+---
+title: "Econ 343 Visualize pvalues"
+author: "B. Haney"
+date: "9/20/2020"
+output:
+  pdf_document: 
+    dev:  png
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearHypothesis(), predict() hccm() heterosced and qqPlot()
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+options(scipen=999) # prevents scientific notation
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+# Use Visualize.it() to graph p-values
+
+## Requires the package "visualize"
+
+## Note the change to the yaml code to add `dev:  png`
+
+- Use this to visualize the p-values or critical values for hypothesis tests.
+
+- Provide the test-statistic (tstat) and the other information 
+required for the relevant test distribution (normal, t, F, $chi^2$, etc.).
+
+- See the specific Visualize command for each distribution.
+
+- Use the "section=" option to fill in either the upper tail,
+lower tail, or both:
+  - section="upper"
+  - section="lower"
+  - section="tails"
+
+\newpage
+
+# Visualize.norm()
+
+When using the "tails" option, the tstat and -1*tstat must be
+provided as a list "c(-1*tstat,tstat)" as in the following example.
+```{r}
+tstat = 1.75
+visualize.norm(stat=c(-1*tstat,tstat), mu=0, sd=1,section="tails")
+```
+\newpage
+# Visualize.t() 
+
+```{r}
+tstat = -1.75
+df = 30
+visualize.t(stat=tstat,df=df,section="lower")
+```
+\newpage
+# Visualize.F()
+
+```{r}
+tstat = 1.75
+df1 = 3
+df2 = 30
+visualize.f(stat=tstat,df1=df1,df2=df2,section="upper")
+```
+
