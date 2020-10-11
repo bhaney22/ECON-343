@@ -1,4 +1,4 @@
 *.html
 /GSS
 /images
-GSS2018.Rdata
+!GSS2018.Rdata
