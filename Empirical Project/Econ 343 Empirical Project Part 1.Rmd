@@ -7,8 +7,6 @@ output:
     toc_collapsed: yes
     toc_float: yes
     toc_levels: 4
-  pdf_document:
-    toc: yes
 ---
 
 ```{r setup, include=FALSE}
