@@ -1,0 +1,274 @@
+---
+title: "Econ 343 Ch 6 HW C8 C 13 Lastname, Firstname"
+output:
+  pdf_document: 
+    toc: yes
+  html_document:
+    df_print: paged
+  word_document: default
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+Instructions: 
+
+- Save your commands and show all work for the Cengage computer exercises
+- the variable names should make it obvious what you are computing
+
+- Each problem should begin by providing the context - that is, the steps of empirical analysis:
+
+1. Economic Question
+2. Economic Model
+3. Econometric Model
+4. Data
+5. Analysis
+
+- Then begin inserting the parts of the Cengage problem
+- perform all calcuations in R chunks
+- present all results in the write-up below the r chunks - using r inline to recall any estimated or calculated results
+
+- For each part in the problem:
+  - Include the following sections as needed:
+  - _Description_ Explain what the purpose of that part of the question is
+  - _Estimated Equation_
+    - Unless indicated otherwise, write out the estimated regression equation using R inline.
+    - Use the `\underset{}{}` command to put the standard errors under each of the slope coefficients in the equation
+
+  - _Results_ 
+    - Interpret what the estimated coefficient means, put into real terms when possible and/or helpful
+    - Present the results and conclusion of any hypothesis tests
+
+
+# Ch. 6 C8 House Price II
+
+## Part (i) Regression
+
+``` {r}
+load(???)
+mydata <- Data
+lm6.8i <- lm(???)
+
+```
+
+### Prediction
+
+```{r}
+# Review Ch 6 Lecture for how to use the predict() command
+
+# An example for how to do the first problem is below. You will
+# need to change the values as needed to match your problem on Cengage
+
+xvals <- data.frame(lotsize = 10000,sqrft = 2000, bdrms = 3)
+
+ypred1 <- predict(lm6.8i,xvals)
+
+```
+
+
+
+
+## Part (ii) CI for predicted $\hat{y}$:
+
+Cengage walks you through how to "trick"
+the regression to give you the confidence interval
+around the prediction in part (i). This is similar to using algebra to "trick" the regression to provide the results of 
+a linear hypothesis test in Ch 4. 
+
+Although I have you practice the "trick" approach to answer the Cengage problem, I also give you the one-line of code that you can use to check your answer and use instead. 
+
+The five steps to compute the CI for a prediction by hand: 
+
+1. Run a new regression
+2. Obtain the $\hat\beta$ for the constant 
+3. Obtain the $se_{\hat\beta}$ from the constant
+4. Look up the *tvalue* for the d.f. of the model
+5. Plug these numbers into the CI formula and calculate the lower and upper CI by hand. 
+
+Use following code chunk to give you the answers you need for part (ii).
+
+### Method 1: Calculate CI by hand 
+
+1. Trick the regression to provide the *se* of the point-estimate.
+
+```{r}
+
+# Again, I have given you an example for how to do this, but you need
+# to change the values as needed
+# Subtract the input values for each variable from
+# the variable in the regression.
+lm6.8ii <- lm(price ~ 
+                I(lotsize - 10000) +
+                I(sqrft - 2000) +
+                I(bdrms - 3), data = mydata)
+
+stargazer(lm6.8ii, type = "text")
+
+# The point-estimate and se of the prediction is from the Constant!
+
+
+# Obtain the critical value
+alpha <- 0.05
+cval <- abs(qt(alpha/2,???))
+
+# Calculate the CI
+
+
+```
+
+2. Obtain the point-estimate for the price of a house with these
+characteristics from the constant in
+the estimated regression $\hat\theta$ = `r point.estimate`,
+
+3. Obtain the standard error of the estimate from the saved results of the regression $se_{\hat\theta}$ = `r se`.
+
+4. Find the *critical value* for a 95% confidence interval with df = 84 (n-k-1) (using  `qt(alpha/2,df)` command in `R` *C.V.* = `r cval`.
+
+
+5. Use the standard confidence interval formula to calculate the CI:
+$$\hat\theta \pm
+t_{\alpha/2,df=n-k-1} * se_{\hat\beta_{Intercept}}$$
+
+$$`r point.estimate` \pm `r cval` * `r se`$$
+Write out the confidence interval for expected price (in thousands) for houses with these characteristics as **[$`r lowerci`, $`r upperci`]**.
+
+\newpage
+
+In *R*, you can execute all of the above steps with just one command:
+
+### Method 2: Use predict() to obtain confidence interval
+
+In *R*, you can simply use `predict()` to accomplish all of the above steps in one command.
+
+```{r}
+# Review Ch 6 R Lecture for how to use interval = "confidence" in the predict command
+
+
+
+# Review Lecture 6 for how to save the predict() results to use in r inline.
+
+
+```
+
+
+
+## Part (iv) CI for single prediction (WIDE prediction)
+
+In part (iii) the confidence interval was for the predicted selling price for a house with certain characteristics.
+Part (iv) asks for the CI for the price of a particular house. 
+
+Simply use `interval = "predict"` in the predict() to get the wider CI.
+
+```{r}
+
+
+```
+
+
+
+\newpage
+
+# Ch. 6 C13 School Expenditures
+
+## Part (i) Regression
+
+``` {r}
+load(???)
+mydata <- Data
+lm6.13i <- ???
+
+```
+
+
+## Part (ii) Compare ranges of $y$ and $\hat{y}$
+
+```{r}
+## Use mutate with the fitted () command to add the fitted values 
+# as a new variable in the dataset. 
+
+mydata <- mydata %>% 
+  mutate(yhat = fitted(lm6.13i))   
+
+
+```
+
+
+
+## Part (iii) Find largest residual
+
+```{r}
+# Residuals
+
+# Use the mutate command with the resid() command 
+# to add the residuals as a new variable to the dataset
+mydata <- mydata %>%
+  mutate(resid1 = resid(lm6.13i))
+
+
+```
+
+
+## Part (iv) Joint Significance test
+
+```{r}
+# Run the new regression
+lm6.13iv <- ???
+
+# Use linearHypothesis() to conduct joint significance tests
+
+
+# Review Ch 4 R Lecture for saving test results as variables to use 
+# in r inline in the write-up below
+
+
+```
+
+
+
+## Part (v) Scale()
+
+```{r}
+# CAUTION: When running a scaled regression, don't
+# forget to add the "0" to indicate no constant.
+lm6.13v <- lm(???)
+
+stargazer(lm6.13v,type = "text")
+```
+
+
+
