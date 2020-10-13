@@ -44,6 +44,14 @@ known as "data wrangling".
 The following commands read in the entire GSS 2018 dataset that has been download for you already. Your task is to add additional variables that you might want to analyze to the list of variables in `myvars`.
 
 ```{r}
+## 
+## >>>> STUDENT WORK: Dont' forget - KNIT to HTML (not.pdf)
+##
+
+## 
+## >>>> STUDENT WORK: Update the location of the dataset as necessary:
+##
+load("~/ECON 343/Empirical Project/GSS2018.Rdata")
 
 ## 
 ## >>>> STUDENT WORK: Add additional variables to the list below as needed
@@ -51,13 +59,9 @@ The following commands read in the entire GSS 2018 dataset that has been downloa
 myvars    <- c("SIZE","EDUC","DEGREE","WRKSTAT","HRS1","TAX","PARTYID", "REGION",
                "COURTS","INCOME16")
 
-##
-## Standard list of variables to have in the dataset
-## 
 varsstd <- c("YEAR", "ID", "AGE", "RACE", "SEX", "MARITAL", "CHILDS","WTSSALL")
 varlist <- c(varsstd,myvars)
 
-load("~/ECON 343/Empirical Project/GSS2018.Rdata")
 mygss <- gss2018 %>% select(all_of(varlist))
  
  
