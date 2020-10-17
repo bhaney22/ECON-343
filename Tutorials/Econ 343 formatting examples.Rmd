@@ -1,0 +1,100 @@
+---
+title: "Econ 343 Numeric Formatting examples"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+options(scipen = 999) # prevents r from using scientific notation
+
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+# Prevent Scientific Notation with *options(scipen = 999)*
+
+```{r}
+options(scipen = 999) # putting this option in your first r chunk
+                      # prevents r from using scientific notation
+```
+
+# Use *format()* for additional options
+
+```{r}
+## Create variables to use in the formatting examples below
+
+mydata <- hprice1
+lm1 <- lm(price ~ bdrms + sqrft ,data = mydata)
+bhat1 <- coef(lm1)
+bhat_0 <- round(bhat1["(Intercept)"],2)
+bhat_1 <- round(bhat1["sqrft"],2)
+bhat_2 <- round(bhat1["bdrms"],2)
+
+yhat_225  <- (bhat_0 + bhat_1*2000  + bhat_2 * 4) * 100
+
+```
+
+
+# Add comma separators using *format()* with "big.mark"
+
+```{r}
+
+yhat_225a <- format(yhat_225,big.mark=",")
+
+```
+
+
+
+# Add exactly 2 decimals using *format()* with "nsmall"
+```{r}
+
+yhat_225b <- format(round(yhat_225,2), nsmall=2, big.mark=",") 
+
+
+```
+
+# How they look when knitted
+
+The estimated price is \$`r yhat_225` (yhat_225). 
+
+
+The estimated price is \$`r yhat_225a` (yhat_225a).
+
+
+The estimated price is \$`r yhat_225b` (yhat_225b).
