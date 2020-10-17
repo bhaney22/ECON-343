@@ -171,8 +171,10 @@ lm.exppp <- lm(log(exppp) ~ lunch,data=mydata)
 
 The residuals represent the part of log(exppp) that is not correlated with lunch
 ``` {r}
+# Create a new variable, logexppp.partial, that contains the residuals
 
-logexppp.partial <- resid(lm.exppp)
+mydata <- mydata %>% 
+  mutate(logexppp.partial = resid(lm.exppp))
 ```
 
 
@@ -192,9 +194,15 @@ stargazer(lm.mlr,lm.partial,type="text",
 
 # Look at the new correlations
 ```{r}
-round(cor(mydata %>% 
-            mutate(lexppp = log(mydata$exppp),
-                   lexppp.partial = logexppp.partial)),2)
+
+# Create a new variable, lexppp, that is the log of exppp
+
+mydata <- mydata %>% 
+  mutate(lexppp = log(exppp)) 
+
+# examine the correlation between of all variables in the dataset
+# and round to two decimals to make it easier to read the table.
+round(cor(mydata),2)
 ```
 
 
