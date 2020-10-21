@@ -73,13 +73,21 @@ stargazer(mydata, digits = 0, type="text",
 ```
 
 
-# Correlation Matrix
+# Correlations 
 
 What do you notice?
 
 ``` {r}
-cor.tbl <- cor(mydata)
-stargazer(cor.tbl,type="text",digits=2)
+
+# You can use cor() to look at the correlations between each pair of variables of interest:
+
+cor(mydata$math4,mydata$lunch)
+cor(mydata$math4,mydata$exppp)
+cor(mydata$lunch,mydata$exppp)
+
+# Or, you can use the cor() command with a dataset to produce a convenient correlation matrix
+cor(mydata)
+
 
 ```
 
