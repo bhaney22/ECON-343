@@ -238,6 +238,17 @@ of the bias can be estimated. (see Sec 3-3b on pp. 84-85 in the text)
 
 
 # What happens when an important variable is left out of the model?
+
+If an important variable is left out of the model, the estimated coefficients will be biased.
+
+Will they be biased upward or downward? It depends on the sign of two correlations.
+
+- If the correlation between the omitted variable and both the explanatory variable and the dependent are positive, they bias will be positive.
+
+- If the correlations are of different signs, the bias will be negative. 
+
+## Example
+
 Suppose the true population model is:
 
 True Model: $y = \beta_0 + \beta_1  x_1 + \beta_2  x_2 + u$
