@@ -38,8 +38,11 @@ Ch 6 R Lecture.Rmd
 
 Ch 7 R Lecture.Rmd
 
-- using mutate(case_when) to create dummy variables
-- commands to evaluate dummy variable regressions (linear probability models)
+to create dummy variables:
+
+- mutate()
+- if_else()
+- case_when()
 
 Ch 10 R Lecture.Rmd
 

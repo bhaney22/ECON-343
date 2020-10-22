@@ -52,18 +52,14 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 # Ch 7 R Lecture
 
 ### R commands reviewed in this lecture
-
-`mydata <- mydata %>%`
-
-`mutate( newvar = case_when(`
-
-`oldvar == 0 ~ 0,`
-
-`oldvar >  0 ~ 1))`
+- mutate()
+- if_else()
+- case_when()
 
 
 # Key Concepts
 
+- Creating dummy variables
 - Using and interpreting dummy regressors
 - Using dummy variable as the dependent variable
   - _Linear Probability Model_ 
@@ -71,6 +67,51 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 - Interaction terms between dummy variables
 - Interaction terms between dummy and quantitative variables
 - Creating dummy variables
+
+# Creating dummy variables
+
+### if_else() example
+
+Create four dummy variables: 1) female athletes, 2) male athletes, 3) female non-athletes, and 4) male non-athletes.
+```{r}
+mydata <- gpa2
+
+mydata <- mydata %>%   mutate(
+  femath      = if_else(female == 1 & athlete == 1, 1, 0),
+  maleath     = if_else(female == 0 & athlete == 1, 1, 0),
+  femaleath   = if_else(female == 1 & athlete == 0, 1, 0),
+  malenoath   = if_else(female == 0 & athlete == 0, 1, 0))
+
+```
+
+### case_when() example 1
+
+Collapse a variable with several categories down to a single dummy variable. 
+
+Create `veryhappy` to indicate people who chose "very happy".
+
+```{r}
+mydata <- happiness
+
+mydata <- mydata %>%   mutate(
+  veryhappy = case_when(happy == "very happy" ~ 1,
+                        happy != "very happy" ~ 0))
+
+```
+
+### case_when() example 2
+
+Create a dummy variable based on the range of values of a quantitative variable.
+
+Create `ecobuy` to indicate if a person bought eco-friendly apples.
+
+```{r}
+mydata <- apple
+mydata <- mydata %>%
+  mutate(ecobuy = case_when(ecolbs == 0 ~ 0,
+                            ecolbs  > 0 ~ 1))
+```
+
 
 
 # Different intercepts by category
