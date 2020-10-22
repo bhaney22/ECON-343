@@ -92,10 +92,19 @@ Create `veryhappy` to indicate people who chose "very happy".
 
 ```{r}
 mydata <- happiness
+as_tibble(happiness)
 
 mydata <- mydata %>%   mutate(
   veryhappy = case_when(happy == "very happy" ~ 1,
                         happy != "very happy" ~ 0))
+
+mydata <- mydata %>%   mutate(
+  veryhappy1 = case_when(happy == "very happy" | happy == "pretty happy" ~ 1,
+                        TRUE ~ 0))
+
+cro(mydata$happy,mydata$veryhappy)
+
+cro(mydata$happy,mydata$veryhappy1)
 
 ```
 
@@ -127,6 +136,7 @@ mydata <- mydata %>%
                             ros >= 0 ~ 0))
 # run the regression
 lm1 <- lm(log(salary) ~ log(sales) + roe + rosneg, data = mydata)
+lm2 <- lm(log(salary) ~ log(sales) + roe + ros, data = mydata)
 
 model  <- lm1
 b      <- summary(model)$coef[,1]           # estimated coefficient (beta_hat)
@@ -134,7 +144,7 @@ se     <- summary(model)$coef[,2]           # se of the estimated coefficient
 tstat  <- summary(model)$coef[,3]           # t-stat computed by r
 pval   <- summary(model)$coef[,4]           # p-value for H0: beta = 0 (two-sided alternative)
 
-stargazer(lm1,type="text")
+stargazer(lm1, lm2, type="text")
 
 ```
 
