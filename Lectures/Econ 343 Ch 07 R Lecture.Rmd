@@ -158,6 +158,112 @@ the difference in the average salary between CEOs with positive vs. negative *ro
 **Write-up** Negative *ros* does have a statistically significant impact on CEO salaries. The coefficient on *rosneg* (**$\hat\beta_{rosneg}=$ `r b["rosneg"]`**) implies that if the CEO’s firm had a negative return on its stock over the 1988 to 1990 period, the CEO salary will
 be about **`r b["rosneg"]*100`**% lower on average, controlling for *sales* and *roe*.  The **p-value=`r pval["rosneg"]`** is significant at the 5% level.
 
+# Multiple Categories
+
+## One variable with multiple categories
+
+Example: Status
+
+- 1 = out of workforce
+
+- 2 = unemployed
+
+- 3 = employed
+
+
+Create a dummy variable for two of the three status categories to use in the regression.
+
+```{r}
+mydata.1 <- alcohol
+
+mydata.1 <- mydata.1 %>% mutate(
+  olf   = if_else(status == 1, 1, 0),
+  unemp = if_else(status == 2, 1, 0),
+  emp   = if_else(status == 3, 1, 0)
+)
+
+lm.1 <- lm(abuse ~ olf + unemp + fathalc + educ + age + famsize, data = mydata.1)
+stargazer(lm.1,type = "text")
+```
+
+
+The intercept in the regression is the intercept for the **base** (left out) status, which in this case is "employed." The coefficient on "olf"  represents the **difference** in alcohol abuse between people out of the labor force vs. employed people. The intercept on "unemp" is the difference between unemployed people and employed people, as well.
+
+## Multiple variables and multiple categories 
+
+In the above example, the multiple categories all had to do with one variable - labor force status. Another instance of multiple categories can occur by combining single variable categories together. For example, married and female are each single categories.
+
+There are two approaches to using these kinds of multiple categories in regressions.
+
+### Approach 1: Create separate, mutually exclusive categories
+
+Example 7.6 Examines wage differences across four mutually exclusive groups:
+
+- single men
+- single women
+- married men
+- married women
+
+Create dummies that represent three of the four categories, and put them in the regression. 
+
+$$ \widehat{log(wage)} = 
+\beta_0 + \beta_1 singfem + \beta_2 marrfem + \beta_2 marrmale + control \ variables + u $$
+
+```{r}
+
+mydata.mc <- wage1
+
+# Create a dummy variable that represents each category
+
+mydata.mc <- mydata.mc %>% mutate(
+  marrmale   = if_else(married == 1 & female == 0, 1, 0),
+  marrfem    = if_else(married == 1 & female == 1, 1, 0),
+  singfem    = if_else(married == 0 & female == 1, 1, 0)
+)
+
+lm1.mc <- lm(log(wage) ~ marrmale + marrfem + singfem + educ +
+               exper + I(exper^2) + tenure + I(tenure^2), data = mydata.mc)
+
+bhat1 <- coef(lm1.mc)
+
+```
+
+
+### Approach 2: Examine differences by each categories separately
+
+In this approach, the single category dummy variables are not used to create new dummy variables. Instead, they are entered into the regression separately and also as an interaction term.
+
+$$ \widehat{log(wage)} = 
+\beta_0 + \beta_1 female + \beta_2 married + \beta_2 married*female + control \ variables + u $$
+
+```{r}
+
+
+lm2.mc <- lm(log(wage) ~ married*female + educ +
+               exper + I(exper^2) + tenure + I(tenure^2), data = mydata.mc)
+
+stargazer(lm1.mc,lm2.mc,type = "text",
+          intercept.bottom = FALSE,
+          column.labels = c("Approach 1","Approach 2"),
+          keep = c("marrmale","marrfem","singfem",
+                   "married","female","married:female","educ"),
+          order = c("marrmale","marrfem","singfem",
+                   "married","female","married:female","educ"))
+
+
+```
+
+- Notice that either approach gives the same estimated coefficient for single men and single women. 
+
+- What is different betwen the two approaches is the coefficient on the multiple category - married women. 
+
+  - In Approach 1, the coefficient is the difference between married women and the base group - single men. This is the easiest approach when the economic question is about the difference between the categories and the base group. On average, married women earn `r abs(bhat1["marrfem"])` % less than single men.
+  
+  - In Approach 2, the coefficient on the interaction term represents the difference between being "married and female" vs. just being married and just being female. So to determine the difference between married and female and the base category (single men) all three coeffiecients on the dummy variables must be added together.
+
+- Why use Approach 2 if you have to do math to get the intercept for married women? Because Approach 2 allows you to ask a different question. 
+
+- As discussed in section 7-4a, this approach allows you to examine whether the **gender differential depends on marital status** (or equivalently, if the marriage premium differs by gender). 
 
 
 # Different Slopes by category
