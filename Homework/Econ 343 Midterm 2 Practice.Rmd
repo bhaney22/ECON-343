@@ -1,0 +1,69 @@
+---
+title: "Econ 343 Midterm 2 Practice"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(sjmisc)
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(scipen=999)
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+
+# Chapter 4 - Inference
+
+Instructions: 
+
+- Use R to recreate the regressions and hypothesis tests in examples 4.1 - 4.9. 
+
+- For examples 4.1 - 4.5 also use the pvalue method to evaluate the hypothesis test.
+
+- For example 4.9, use the lht() command.
+
+
+# Chapter 6 - Post-regression Analysis
+
+Instructions: 
+
+- Use R to recreate regressions and post-regression computations for examples 6.3, 6.5, 6.6
+
+- Use R to recreate the regressions and answer the questions in end-of-chapter problems 6.4 and 6.10. (NOT the computer problems.)
+
+- Use R to answer the do the computer problems C6.2, C6.9, and C6.14.
+

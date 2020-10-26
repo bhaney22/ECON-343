@@ -245,9 +245,9 @@ lm2.mc <- lm(log(wage) ~ married*female + educ +
 stargazer(lm1.mc,lm2.mc,type = "text",
           intercept.bottom = FALSE,
           column.labels = c("Approach 1","Approach 2"),
-          keep = c("marrmale","marrfem","singfem",
+          keep = c("Constant","marrmale","marrfem","singfem",
                    "married","female","married:female","educ"),
-          order = c("marrmale","marrfem","singfem",
+          order = c("Constant","marrmale","marrfem","singfem",
                    "married","female","married:female","educ"))
 
 
