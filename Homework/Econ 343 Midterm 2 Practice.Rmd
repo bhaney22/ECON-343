@@ -57,6 +57,45 @@ Instructions:
 - For example 4.9, use the lht() command.
 
 
+
+## Example 4.1
+
+- use pval method to conduct one-sided t-test for exper
+- interpret coef on exper
+
+
+## Example 4.2
+
+- use pval method to conduct one-sided t-test for enroll
+- interpret coef on enroll
+
+
+
+## Example 4.3
+
+- use pval method to conduct one-sided t-test for exper
+- interpret coef on exper
+
+## Example 4.4
+
+- use pval method to conduct one-sided t-test for exper
+- interpret coef on exper
+
+## Example 4.5
+
+
+## Example 4.6
+
+
+## Example 4.7
+
+
+## Example 4.8
+
+
+## Example 4.9
+
+
 # Chapter 6 - Post-regression Analysis
 
 Instructions: 
@@ -66,4 +105,28 @@ Instructions:
 - Use R to recreate the regressions and answer the questions in end-of-chapter problems 6.4 and 6.10. (NOT the computer problems.)
 
 - Use R to answer the do the computer problems C6.2, C6.9, and C6.14.
+
+
+## Example 6.3
+
+
+## Example 6.5
+
+
+## Example 6.6
+
+
+## EOC Prob 6.4
+
+
+## EOC Prob 6.10
+
+
+## EOC Computer C6.2
+
+
+## EOC Computer C6.9
+
+
+## EOC Computer C.14
 
