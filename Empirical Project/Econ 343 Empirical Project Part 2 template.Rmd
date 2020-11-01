@@ -1,14 +1,14 @@
 ---
 title: "Econ 343 Empirical Project Final Report **lastname, firstname**"
 output:
+  pdf_document:
+    toc: yes
   html_document:
     number_sections: yes
     toc: yes
     toc_collapsed: yes
     toc_float: yes
     toc_levels: 2
-  pdf_document:
-    toc: yes
 ---
 
 
@@ -26,7 +26,7 @@ library(effects)    # to plot effects of one regressor, holding all others const
 library(visualize)  # to visualize hypothesis test p-values
 library(dynlm)      # lm commands for time series data
 library(plm)        # lm commands for panel data
-
+library(kableExtra)
 
 options(scipen=999)
 options(digits=4)   # limits number of decimals to 4 when printing
@@ -125,12 +125,19 @@ stargazer(mydata,type = "text")
 
 - Format, lable, and title the tables to be presentable for a professional final draft
 
+- see the example table below for how to create tables that can be knitted to .pdf (use the "split_table_to_df()" ...)
+
 
 ```{r}
-
-
+# Example table
+ drop_rc(cro_cpct(mygss$agegrp,mygss$party, 
+                  weight = mygss$WTSSALL))%>%
+  significance_cpct()%>%
+  split_table_to_df() %>%
+  kable(booktabs = T) 
 
 ```
+
 
 **Discuss** Discuss the points that you are illustrating for each table.
 
@@ -168,7 +175,7 @@ When dealing with real data (outside of homework-land), missing value patterns c
 # Example - be sure to replace or add to the list of variables that you need
 # Be sure you include the WTSSALL variable in the dataset you use for regressions
 
-lm.mydata <- mydata %>% select(teamwork, AGE,femail,collgrad,faminc2018,EDUC,WTSSALL)
+lm.mydata <- mydata %>% select(teamwork, AGE,faminc2018,EDUC,WTSSALL)
 
 lm.mydata <- na.omit(lm.mydata)
 
@@ -179,10 +186,10 @@ stargazer(lm.mydata,type = "text")
 ## Regression Results
 ```{r}
 
-# Example - replace this regression model with your own.
+# Example regression - replace this regression model with your own.
 # Be sure to use the command "weights = WTSSALL" in your regression
 
-lm1 <- lm(teamwork ~ EDUC + AGE + female + collgrad + faminc2018, 
+lm1 <- lm(teamwork ~ EDUC + AGE + faminc2018, 
           data = lm.mydata,
           weights = WTSSALL)
 
