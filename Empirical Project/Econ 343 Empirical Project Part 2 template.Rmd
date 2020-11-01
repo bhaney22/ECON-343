@@ -26,7 +26,7 @@ library(effects)    # to plot effects of one regressor, holding all others const
 library(visualize)  # to visualize hypothesis test p-values
 library(dynlm)      # lm commands for time series data
 library(plm)        # lm commands for panel data
-library(kableExtra)
+library(kableExtra) # more info: https://haozhu233.github.io/kableExtra/awesome_table_in_pdf.pdf
 
 options(scipen=999)
 options(digits=4)   # limits number of decimals to 4 when printing
