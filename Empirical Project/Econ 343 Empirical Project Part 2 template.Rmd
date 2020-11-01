@@ -1,0 +1,265 @@
+---
+title: "Econ 343 Empirical Project Final Report **lastname, firstname**"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_collapsed: yes
+    toc_float: yes
+    toc_levels: 2
+  pdf_document:
+    toc: yes
+---
+
+
+```{r setup, include=FALSE}
+library(wooldridge) # datasets in the textbook
+library(dplyr)      # data wrangling
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(expss)      # apply_labels() calc_cro() tables
+library(sjmisc)     # frq()
+library(sjlabelled) # useful label commands
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+
+options(scipen=999)
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunk echoed in
+options(knitr.duplicate.label = 'allow')
+```
+
+
+# Project Overview
+
+{Instructions for Project Summary: Fill in the bold aspects of the 5 parts of empirical analysis below. For each bullet point, provide a sentence or two of description or explanation.}
+
+## 1. Economic Question*
+
+
+
+- Explain briefly why this question is interesting using infographic, statistics, and opinion articles. 
+
+## 2. Economic Model
+
+
+- Helpful Hint: Use the research paper you found to help explain the list of explanatory variables.
+
+## 3. Econometric Model
+
+- describe your econometric model in equation and words 
+
+## 4. Data
+
+
+- describe the GSS and the year you are using for your analysis
+
+- make sure to cite the GSS data source using a footnote.\footnote{Smith, Tom W., Davern, Michael, Freese, Jeremy, and Morgan, Stephen, General Social Surveys, 1972-2018 [machine-readable data file] /Principal Investigator, Smith, Tom W.; Co-Principal Investigators, Michael Davern, Jeremy Freese, and Stephen Morgan; Sponsored by National Science Foundation. --NORC ed.-- Chicago: NORC, 2018: NORC at the University of Chicago [producer and distributor]. Data accessed from the GSS Data Explorer website at gssdataexplorer.norc.org.}
+
+- describe who was sampled in the dataset
+
+- describe how the data are weighted
+
+- define each of the variables that you use in your analysis.
+
+- provide **summary tables and crosstabs** for each variable
+
+- include important tables from Part 1 that demonstrate relationships between variables that you will explore further with regression analysis
+ 
+
+## 5. Summary of Results
+
+- this is like an abstract
+
+- in a paragraph or so describe what you did in your analysis and display a table or graph of one of your key findings
+
+- the next part of the empirical report contains the full methods, analysis, and conclusion sections
+
+# Introduction
+
+- In this section of the project, go into more detail about the **economic question** you
+are exploring. 
+
+- Explain why this 
+question is interesting using statistics, graphs, and the variety of opinions you found.
+
+- Present the **economic model**. What is the dependent variable of interest? 
+What are the explanatory variables in the model?
+
+- Briefly summarize how the research paper(s) you found contribute to understanding your question. 
+Make sure you add every citation to your references at the end of the report.
+
+
+
+## Data and Methods
+- What are these data? Where were they obtained? How were the data  
+sampled (the "sampling frame"). 
+
+- Define the primary dependent variable(s) and explanatory variables. 
+
+- Explain how these variables are operationalized in the dataset.
+
+
+```{r}
+# Display the basic variables you are using for your analysis
+# Change the location of your mygss.RData file as needed
+load("~/ECON 343/Empirical Project/mygss.RData")
+mydata <- mygss
+stargazer(mydata,type = "text")
+
+
+```
+
+# Preliminary Analysis
+
+- What are the key relationships you want to explore? 
+
+- Look at simple comparisons and correlations first.
+
+- Re-create at least 2 key tables you created in the Empirical Project Part 1.Rmd file
+
+- Format, lable, and title the tables to be presentable for a professional final draft
+
+
+```{r}
+
+
+
+```
+
+**Discuss** Discuss the points that you are illustrating for each table.
+
+```{r}
+
+
+
+```
+
+
+# Regression Analysis
+
+## Missings
+
+Instructions:
+
+When dealing with real data (outside of homework-land), missing value patterns can cause problems. 
+
+- Regressions only use observations that have no missings in any of the variables in the regression. 
+
+- Post-regression commands, such as fitted(), want to use the entire dataset, includig observations that are not in the regression.
+
+- So, always create a fresh dataset for your regression that includes only observations with no missing values for the variables in your model. 
+
+- See the example below that uses `na.omit() with the select()` command to create `lm.mydata` that contains only observations with no missing values for the variables used in regressions 
+
+- Use `lm.mydata` for all regressions to ensure that the the results are based on the same sample 
+
+- Use `lm.mydata` for post-regression analysis to ensure you are using the same dataset consistently
+
+
+## Create regression dataset
+
+```{r}
+# Example - be sure to replace or add to the list of variables that you need
+# Be sure you include the WTSSALL variable in the dataset you use for regressions
+
+lm.mydata <- mydata %>% select(teamwork, AGE,femail,collgrad,faminc2018,EDUC,WTSSALL)
+
+lm.mydata <- na.omit(lm.mydata)
+
+stargazer(lm.mydata,type = "text")
+
+```
+
+## Regression Results
+```{r}
+
+# Example - replace this regression model with your own.
+# Be sure to use the command "weights = WTSSALL" in your regression
+
+lm1 <- lm(teamwork ~ EDUC + AGE + female + collgrad + faminc2018, 
+          data = lm.mydata,
+          weights = WTSSALL)
+
+stargazer(lm1,type="text")
+
+```
+
+
+## Check Predicted probabilities
+
+- Remember to use the lm.mydata data in all regressions, and post-regression commands
+
+- Remember to use the "weight = WTSSALL" option in all tables.
+
+```{r}
+
+
+
+```
+
+**Write-up** Describe whether the model produced invalid predicted probabilities or not
+
+
+# Evaluate the LPM model 
+
+
+- Compare actual to predicted probabilities.
+
+```{r}
+
+
+
+
+```
+
+**Write-up** Discuss how well the model did at predicting the correct outcomes: overall, and for each of the two different groups of your dependent variable  
+
+# Sensitivity Analysis
+
+- Try running your model on a sub-group or re-code a variable differently to see if you still get 
+qualitatively similary results
+
+- Compare and contrast the results of the two approaches. Are your results "robust" to an alternative model?
+
+
+```{r}
+
+
+
+```
+
+**Discuss** Explain how similar your conclusions are under different approaches
+
+
+# Linear Hypothesis Test
+
+- Test something from your main model or use an F-test to compare the two models you ran for sensitivity analysis.
+
+
+
+```{r}
+
+
+```
+
+**Discuss**
+
+
+
+# Conclusion
+
+- In this last section:
+  + Restate the economic question
+  + Explain how the primary research paper contributed to understanding that
+  question.
+  + Describe what you learned from the process
+  + Conclude with suggestions of additional questions that would be
+  interesting to pursue based on what you found.
+  
+# References
