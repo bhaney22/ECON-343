@@ -1,0 +1,353 @@
+---
+title: "Econ 343 Ch  7 R Lecture"
+output:
+  html_document:
+    number_sections: no
+    toc: yes
+    toc_collapsed: yes
+    toc_float: yes
+    toc_levels: 3
+  beamer_presentation: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+# Ch 7 Part 2 R Lecture
+
+## R commands reviewed in this lecture
+
+- partial effect graphs `plot(effect())`
+
+- mutate() with case_when() and if_else()
+
+- cro() for crosstabs
+
+### Key Concepts in this lecture
+
+- Linear Probability Model
+
+- Selection Bias in Treatement effect models
+
+
+
+# Linear Probability Model
+
+- A dummy dependent variable takes on the value of "0" or "1". 
+
+- The predicted values (fitted()) from
+the regression represent a probability, somewhere between 0 and 1, of belonging to the category. 
+
+- the fitted() values can be re-coded to be "0" or "1" based on whether the predicted probability is greater than some value, usually 0.05
+
+- Regression coefficients represent the change in percentage points of the probability of belonging to the category. 
+
+- In this sense, interpretation in LPM is similar to that of log(y) dependent variables.
+
+
+
+## Eco-friendly apples example
+
+
+**Economic Question** (From Ch 7 Computer Exercise C13) Does the price difference 
+between eco- and non-eco-friendly apples affect whether consumers by eco-friendly apples or not?
+
+1. Frequently, you will start by creating the dummy dependent variable by recoding a quantitative variable. 
+
+```{r}
+mydata <- apple
+mydata <- mydata %>%
+  mutate(ecobuy = case_when(ecolbs == 0 ~ 0,
+                            ecolbs  > 0 ~ 1))
+stargazer(mydata,type="text")
+```
+
+**REMINDER: The mean of a dummy variable is the percent of observations with a value of "1".**
+
+In this sample, **62%** of families bought eco-friendly apples.
+
+2. Run the LPM regression, using the dummy as the dependent variable. Save the results for
+post-estimation computations.
+
+```{r}
+lm7.13 <- lm(ecobuy ~ ecoprc + regprc + faminc + hhsize + educ + age, data=mydata)
+stargazer(lm7.13,type="text")
+
+b <- coef(lm7.13)
+```
+
+**Write-up** The primary regressor we want to examine is price of eco- and non-eco apples. The coefficient on ***ecoprc*** (price of eco-friendly apples) 
+is **$\hat\beta_{ecoprc}$ = `r b["ecoprc"]`** dollars.  This means that if the price eco-apples is
+$0.10 higher than regular apples, then the probability of buying eco-labeled apples *falls* by
+**.10 * $\hat\beta_{ecoprc} * 100$ = `r 0.10 * b["ecoprc"] * 100` percentage points**.
+
+The coefficient on ***regprc*** (price of regular apples) 
+is **$\hat\beta_{regprc}$ = `r b["regprc"]`** dollars. If ***regprc*** increases by **10 cents**, the probability of buying eco-labeled apples **increases** by **.10 * $\hat\beta_{regprc}$ * 100 = `r 0.10 * b["regprc"] * 100` percentage points**.  
+
+
+# LPM: Check predicted probabilities
+
+Note: In the previous write-up, we must assume that the predicted probabilities 
+are not close to the boundaries of zero and one. The next step checks this assumption.
+
+- predicted $\hat{y}$ are predicted probabilities 
+  - one concern researchers have about LPM is that it allows invalid predictions (negative or greater than 1)
+  - but, the predictions (*fitted()* values) can be checked
+  - if there are no or only a few negative or greater than 1 fitted values there is generally no cause for concern
+
+```{r}
+# Get the "y-hats"
+# Recode y-hats to be dummy y_hat (take on 0/1 values only)
+
+mydata <- mydata %>%
+  mutate(yhat  = fitted(lm7.13),
+         yhat_dummy = case_when(yhat >= .5 ~ 1,
+                                yhat  < .5 ~ 0))
+
+range_yhat <- range(mydata$yhat)
+gt1_yhat   <- count(mydata$yhat > 1)
+cro_cpct(mydata$ecobuy, mydata$yhat_dummy)
+
+range_yhat[1]
+range_yhat[2]
+gt1_yhat
+
+
+                            
+```
+
+**Write-up** The fitted probabilities range from `r range_yhat[1]` to `r range_yhat[2]`, so none are negative.  
+There are `r gt1_yhat` predicted probabilities above 1, which is not a source of concern with 660 observations.
+
+
+# LPM Compare actual to predicted probabilities
+
+**Evaluate the LPM model: How well does this model predict eco-buying behavior?**
+
+```{r}
+# create a variable that determines if the predicted y_hat was correct or not
+mydata <- mydata %>%
+  mutate(correct_pred = case_when(yhat_dummy == ecobuy ~ 1,
+                                  yhat_dummy != ecobuy ~ 0))
+
+# overall correct prediction rate
+Pct_correct_pred <- mean(mydata$correct_pred)
+
+# percent of ecobuyers correctly predicted
+Pct_correct_pred_ecobuy <- mean(mydata$correct_pred[mydata$ecobuy == 1])
+
+# percent of non-ecobuyers correctly predicted
+Pct_correct_pred_noecobuy <- mean(mydata$correct_pred[mydata$ecobuy == 0])
+
+Pct_correct_pred
+Pct_correct_pred_ecobuy
+Pct_correct_pred_noecobuy
+                            
+```
+
+**Write-up** This model does a decent job at predicting eco-buying behavior. But, much better for predicting those who do buy eco-friendly apples, vs. those who won't.
+
+- Use the standard prediction rule – $\hat{y}_{dummy}$ = 1 if $\hat{y}$ > or = .5 and zero otherwise.
+
+- The overall percent correctly predicted is **`r Pct_correct_pred*100`%.**
+
+- The percent correctly predicted for those who are ecobuyers is
+**`r Pct_correct_pred_ecobuy*100`%**.   
+
+- The fraction correctly predicted for non-ecobuyers is **`r Pct_correct_pred_noecobuy*100`**%.  
+
+Thus, using the usual prediction rule, the model predicts which consumers will *buy* eco-labeled apples about twice as accurately as it predicts that consumers will not buy eco-apples. 
+
+# Try it yourself: Women labor force participation example
+
+- Example in text explanation for section 7-5
+
+- uses MROZ dataset
+
+## Recreate regression
+
+```{r}
+
+mydata1 <- mroz
+
+# stargazer(mydata1,type = "text")
+
+lpm1 <- lm(inlf ~ nwifeinc + educ + exper + I(exper^2) +
+             age + kidslt6 + kidsge6, data = mydata1)
+stargazer(lpm1,type = "text", intercept.bottom = FALSE)
+
+```
+
+## Graph partial effect
+
+- for more information about options for effect plots, see https://cran.r-project.org/web/packages/effects/vignettes/predictor-effects-gallery.pdf
+
+```{r}
+## This command graphs partial effects at the mean of all other regressors
+plot(effect("educ",lpm1))  
+
+## This is how you pick the values of the other regressors and add titles and limits for the y axis
+plot(effect("educ",lpm1,
+            xlevels=list(educ=c(0,5,10,15,20)),
+            fixed.predictors=list(given.values = c(nwifeinc=50,exper=5,
+                             age=30,kidslt6=1,kidsge6=0))),
+     main = "Education Partial Effects (hccm)",
+     sub = "at nwifeinc=50, exper=5, age=30, kidslt6=1, kidsge6=0",
+     axes=list(y=list(lim=c(-0.5,1.0),lab=("Predicted female lfp"))))
+
+```
+
+## LPM: Check predicted probabilities
+```{r}
+# Get the "y-hats"
+# Recode y-hats to be dummy y_hat (take on 0/1 values only)
+
+mydata1 <- mydata1 %>%
+  mutate(yhat  = fitted(lpm1),
+         yhat_dummy = case_when(yhat >= .5 ~ 1,
+                                yhat  < .5 ~ 0))
+
+range_yhat <- range(mydata1$yhat)
+gt1_yhat   <- count(mydata1$yhat > 1)
+cro_cpct(mydata1$inlf, mydata1$yhat_dummy)
+
+range_yhat[1]
+range_yhat[2]
+gt1_yhat
+
+
+                            
+```
+
+
+## LPM: Compare actual to predicted probabilities
+
+```{r}
+# create a variable that determines if the predicted y_hat was correct or not
+mydata1 <- mydata1 %>%
+  mutate(correct_pred = case_when(yhat_dummy == inlf ~ 1,
+                                  yhat_dummy != inlf ~ 0))
+
+# overall correct prediction rate
+Pct_correct_pred <- mean(mydata1$correct_pred)
+
+# percent of ecobuyers correctly predicted
+Pct_correct_pred_inlf <- mean(mydata1$correct_pred[mydata1$inlf == 1])
+
+# percent of non-ecobuyers correctly predicted
+Pct_correct_pred_notinlf <- mean(mydata1$correct_pred[mydata1$inlf == 0])
+
+Pct_correct_pred
+Pct_correct_pred_inlf
+Pct_correct_pred_notinlf
+                            
+```
+
+# Selection Bias
+
+- dummy variable represents treatment
+
+- non-experimental - treatment is a choice
+
+- outcome is a function of not only receiving treatment, but also other characteristics of the participants
+
+- some characteristics can be observed and controlled for (age, experience, etc.)
+
+- some characteristics are not observable (motivation, access to social networks, etc.)
+
+
+
+## Job training example
+
+- example 7.13 in section 7-6a
+
+- you have to rename the dataset before running this next r chunk
+
+- rename "jtrain98.RData.rename" to "jtrain98.RData"
+
+```{r}
+## for instructor use only: jtrain98 <- as.data.frame(read_dta("jtrain98.dta"))
+## for instructor use only: save(jtrain98,file="jtrain98.RData")
+
+load("jtrain98.RData")
+mydata2 <- jtrain98
+
+lm.jtrain0 <- lm(earn98 ~ train,data=mydata2)
+lm.jtrainRRA <- lm(earn98 ~ train + earn96 + educ + age + married,data=mydata2) 
+lm.jtrainURA <- lm(earn98 ~ train + earn96 + educ + age + married +
+                    I(train * (earn96 - mean(earn96))) +
+                    I(train * (educ - mean(educ))) +
+                    I(train * (age - mean(age))) +
+                    I(train * (married - mean(married)))
+                   ,data=mydata2)
+
+stargazer(lm.jtrain0,lm.jtrainRRA,type = "text",intercept.bottom = FALSE,
+          column.labels = c("Regression 1","Regression 2"),
+          model.numbers=FALSE,
+          column.sep.width = "1pt")
+
+stargazer(lm.jtrainRRA,lm.jtrainURA,type = "text",intercept.bottom = FALSE,
+          column.labels = c("Regression 2","Regression 3"),
+          model.numbers=FALSE,
+          column.sep.width = "1pt")
+
+
+```
+
+_Conclusion_ 
+
+**Regression 1** Difference in means
+
+- without controlling for observable characteristics of the participant the estimated effect of job training on earnings is negative!  
+
+- this is likely because job training is not randomly assigned. Participants in job training are likely to have lower previous earnings (*earn96*), less education, older, and single.
+
+**Regression 2** Difference in means controlling for educ,age,earn96,married
+
+- adding in control variables for *educ,age,earn96,married* yields a positive and statistically significant effect of job training (the second regression) because now teh job training treatment effect compares earnings for participants and non-participants who have the same background characteristics (same level of previous earnings, education, etc.)
+
+**Regression 3** Average Treatment Effect
+
+- adding interaction terms between the treatment dummy and the de-meaned control variables yields the average partial effect for treatment (**Average Treatment Effect**)
+
+_Caution_
+
+- while adding control variables help greatly to reduce selection bias, there is likely to be selection bias on **unobservables** as well
+
+- controlling for unobservable selection bias is possible with more advanced methods in Ch 17
