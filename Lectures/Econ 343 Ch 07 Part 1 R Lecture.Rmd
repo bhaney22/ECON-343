@@ -333,4 +333,3 @@ The difference in average wages for women is: **$\hat\beta_{female}$ = `r  b["fe
 
 The gender difference in the slope coefficient on ***educ*** is the roughly the same and is still not statistically significant. It does not appear that the slope on ***educ*** is different for men and women.
 
-

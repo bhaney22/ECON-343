@@ -43,6 +43,7 @@ to create dummy variables:
 - mutate()
 - if_else()
 - case_when()
+- plot(effect())
 
 Ch 10 R Lecture.Rmd
 
