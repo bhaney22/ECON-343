@@ -1,0 +1,184 @@
+---
+title: "Econ 343 Ch 7 HW C8 Lastname, firstname  "
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(sjmisc)
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+library(kableExtra)
+
+options(scipen=999)
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+**Instructions:**
+
+- The primary learning objective for this HW is interpreting dummy variables.
+- Save your commands and show all work for the Cengage computer exercises
+- the variable names should make it obvious what you are computing
+
+- The problem should begin by providing the context - that is, the steps of empirical analysis:
+
+1. Economic Question
+2. Economic Model
+3. Econometric Model
+4. Data
+5. Analysis
+
+- Then begin inserting the parts of the Cengage problem
+- perform all calcuations in R chunks
+- present all results in the write-up below the r chunks - using r inline to recall any estimated or calculated results
+
+- For each part in the problem:
+  - Include the following sections as needed:
+
+
+_Description_ Explain what the purpose of that part of the question is
+
+_Estimated Equation_ FOR THIS ASSIGNMENT - YOU DO NOT NEED TO WRITE OUT the estimated regression equation using R inline. BUT, always display the regression results using stargazer(). Display regression results side-by-side as indicated below.
+
+_Results_ 
+    - Interpret what the estimated coefficient on `white` means after every regression
+    - Present the results and conclusion of any hypothesis tests
+
+# Ch. 7 C8 Mortgage Approval Rates Linear Probability Model (LPM)
+
+## Part (i)
+
+Nothing required here.
+
+
+## Part (ii)
+
+``` {r}
+# Run the appropriate regression.
+
+lm7C8.ii <- 
+  
+
+```
+
+
+
+## Part (iii)
+
+``` {r}
+# Run the appropriate regression.
+
+lm7C8.iii <-
+
+```
+
+## Part (iv)
+
+``` {r}
+# Run the appropriate regression.
+
+lm7C8.iv <-
+
+# Calculate the confidence interval as specified in Cengage.
+
+```
+
+
+
+
+
+## Part (v)
+
+``` {r}
+# Run the appropriate regression.
+lm7C8.v <-
+  
+
+  
+  
+# HINT: Check out the confint() command in the stats package for this problem.
+  
+
+```
+
+
+
+# I. LPM: Check predicted probabilities
+
+In this section of your HW, you are asked to go beyond the questions in the Cengage HW. For this section, follow the steps in the Ch 7 lecture to examine the validity of the predicted probabilities of the last model that was estimated (lm7.8v). That is, are any of the predicted probabilities negative or greater than 1? 
+
+Discuss the results using the same format that the results are discussed in the **Write-up** portion of the explantion in the lecture.
+
+**Additional Instructions:**
+
+- Use the full dataset `loanapp`, not the Cengage version.
+
+- Eliminate any observations (rows) that have missing data (`NA`) before running the regression
+
+- These two steps are accomplished for you in the first command in the r chunk below that creates the dataset: mydata.nomissings
+
+- Be sure to use `mydata.nomissings` for the rest of the HW assignment
+
+```{r}
+
+mydata.nomissings <- na.omit(loanapp)
+
+lm1.I <- lm( ???, data=mydata.nomissings)
+
+
+```
+
+
+
+
+
+# II. LPM Compare actual to predicted probabilities
+
+In this section of your HW, you are asked to go beyond the questions in the Cengage HW. For this section of your HW, follow the steps in the Ch 7 lecture to examine how well the last model that was estimated (lm7.8v) does at predicting mortgage approvals.
+
+Discuss the results using the same format that the results are discussed in the **Write-up** portion of the explantion in the lecture.
+
+```{r}
+# To fix knitting error, use "the "split_table_to_df() %>%   kable(booktabs = T)"
+# after every cro_() (or related) command
+
+# Example:
+
+# cro_cpct(mydata.nomissings$approve, mydata.nomissings$yhat_dummy) %>%
+#  split_table_to_df() %>%
+#  kable(booktabs = T)
+
+```
+
