@@ -74,11 +74,20 @@ _Results_
 ## Read in the CENGAGE data
 
 ``` {r}
+# TODO >>>> update the load command to point to your version from Cengage <<<<
 
-# load("consump_v1.RData")      # <<<<< change this to your own Cengage version 
-mytsdata <- ts(consump,start = 1959) 
-                                     
-as_tibble(mytsdata)
+load("~/ECON 343/Homework/Data/consump_v1.RData") 
+mydata <- Data %>% select(year,c,y,gc,gy,r3)
+
+## Note: the missing values in the dataset from Cengage are incorrectly denoted
+## as periods "." rather than NA. The following command fixes this error:
+
+mydata <- mydata %>% mutate(
+  gc = as.numeric(ifelse(gc =='.', NA,gc)),
+  gy = as.numeric(ifelse(gy =='.', NA,gy))
+)
+
+mytsdata <- ts(mydata,start=1959)
 
 ```
 
@@ -96,7 +105,7 @@ stargazer(lm.i,type = "text")
 ## Part (ii) add lag
 ``` {r}
 
-# For full credit, use the "L()" command to create the lagged variable in the regression
+# Use the "L()" command to create the lagged variable in the regression
 
 lm.ii <- dynlm()
 
@@ -106,7 +115,7 @@ stargazer(lm.i,lm.ii,type = "text")
 ```
 
 
-## Part (iii) additional regressor
+## Part (iii) add regressor
 ``` {r}
 
 lm.iii <- dynlm()
