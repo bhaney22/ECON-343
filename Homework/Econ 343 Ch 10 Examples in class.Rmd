@@ -1,0 +1,105 @@
+---
+title: "Econ 343 Ch 10 Examples in class 11.19.2020"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+#
+# ===>> SETUP - this r-chunk does not usually need to be changed by the student.
+#
+# The following packages cover all of the commands that will be used in this class,
+# as well as the files from the Wooldridge textbook.
+# 
+# For any assignment, you simply start by making a copy of this file and add the R chunks and
+# text as needed below this setup chunk. 
+#
+# Note that these packages have been carefully selected to create a toolkit that is ideally
+# suited for economic and business analysis. You might find it useful to keep this template and
+# set of packages for future data analysis projects.
+#
+library(readr)      # for reading in .csv files
+library(tidyverse)  # data wrangling
+library(dplyr)      # for filter and select commands. etc.
+library(wooldridge) # datasets in the textbook
+library(stats)      # basic statistic commands
+library(DataExplorer) # nice commands to learn about a new data set
+library(stargazer)  # nice regression output
+library(ggformula)  # easy graphing interface for ggplot
+library(mosaic)     # accompanies ggformula
+library(expss)      # apply_labels() cro()
+library(scales)     # to format inline r as currency
+library(AER)        # data and commands specific to econometrics
+library(car)        # for linearhypothesis tests lht(), predict() hccm() heterosced.
+library(lmtest)     # post-reg tests coeftest()
+library(effects)    # to plot effects of one regressor, holding all others constant
+library(visualize)  # to visualize hypothesis test p-values
+library(dynlm)      # lm commands for time series data
+library(plm)        # lm commands for panel data
+
+options(digits=4)   # limits number of decimals to 4 when printing
+knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in outfile
+```
+
+**Instructions:**
+
+- The primary learning objective for this HW is interpreting time series regressions.
+- Answer all questions that are listed after an R chunk.
+- Each question is worth 10 points (Total 50 pts)
+
+- The R commands you need to answer the Cengage HW are provided. 
+- Don't forget to load your own **unique dataset from Cengage**.
+
+# R commands used in this HW
+
+- ts()
+- dynlm()
+- L()
+
+
+# Ch. 10 Example 4
+
+
+``` {r}
+
+mytsdata <- ts(fertil3,start = 1913) 
+
+as_tibble(mytsdata)
+stargazer(mytsdata,type="text")
+
+```
+
+## Part (i)
+``` {r}
+# Run fertility rate on child tax exemp with two lags, and a dummy for WW2 and the pill.
+lm.i <- dynlm(gfr ~ pe + L(pe,1) + L(pe,2) + ww2 + pill,data=mytsdata)
+lm.ii <- dynlm(gfr ~ pe + L(pe,1) + L(pe,2) + ww2 + pill + trend(mytsdata),data=mytsdata)
+
+stargazer(lm.i,lm.ii,type = "text")
+
+h1 <- lht(lm.ii,matchCoefs(lm.ii,"pe"))
+h1
+
+h2 <- lht(lm.ii,c("L(pe, 1)=0","L(pe, 2)=0"))
+h2
+
+```
+
+## Example 10-7 Housing
+``` {r}
+
+# Run a log-log model of housing investment on housing price with and without a trend. Discuss. Use the HSEINV dataset.
+
+mytsdata7 <- ts(hseinv,start=1947)
+
+lm.7a <- dynlm(log(inv) ~ log(price), data = mytsdata7)
+lm.7b <- dynlm(log(inv) ~ log(price) + trend(mytsdata7), data = mytsdata7)
+
+stargazer(lm.7a,lm.7b,type = "text")
+
+
+```
