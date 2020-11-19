@@ -48,8 +48,16 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 **Instructions:**
 
 - The primary learning objective for this HW is interpreting time series regressions.
-- Answer all questions that are listed after an R chunk.
-- Each question is worth 10 points (Total 50 pts)
+
+- For each part in the problem include the following sections as needed:
+
+
+_Description_ Explain what the purpose of that part of the question is
+
+_Estimated Equation_ FOR THIS ASSIGNMENT - YOU DO NOT NEED TO WRITE OUT the estimated regression equation using R inline. BUT, always display the regression results using stargazer(). Display regression results side-by-side as indicated below.
+
+_Results_ 
+    - Interpret all of the estimated coefficients after every regression
 
 - The R commands you need to answer the Cengage HW are provided. 
 - Don't forget to load your own **unique dataset from Cengage**.
@@ -68,11 +76,7 @@ knitr::opts_chunk$set(echo = TRUE) # TRUE = commands in r chunks to be echoed in
 ``` {r}
 
 # load("consump_v1.RData")      # <<<<< change this to your own Cengage version 
-# mytsdata <- ts(Data,start = 1959) 
-
 mytsdata <- ts(consump,start = 1959) 
-
-
                                      
 as_tibble(mytsdata)
 
@@ -96,8 +100,6 @@ stargazer(lm.i,type = "text")
 
 lm.ii <- dynlm()
 
-summary(lm.ii)
-
 stargazer(lm.i,lm.ii,type = "text")
 
 
@@ -108,8 +110,6 @@ stargazer(lm.i,lm.ii,type = "text")
 ``` {r}
 
 lm.iii <- dynlm()
-
-summary(lm.iii)
 
 stargazer(lm.i,lm.ii,lm.iii,type = "text")
 
